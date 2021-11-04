@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block wrapper %}
+    <div class="wrapper">
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="/assets/img/AdminLTELogo.png" alt="{{ version }}" height="60" width="60">
+        </div>
+        
+        {{ include('section/navbar.html') }}
+
+        {{ include('section/sidebar.html') }}
+
+        {% block content_wrapper %}
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1 class="m-0">{{ modulo }}</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                                    {% if breadcrumb %}
+                                        <li class="breadcrumb-item"><a href="/{{ modulo|lower }}">{{ modulo }}</a></li>
+                                        <li class="breadcrumb-item active">{{ breadcrumb }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item active">{{ modulo }}</li>
+                                    {% endif %}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% block content %}
+                <!-- Main content -->
+                <div class="content">
+                    <div id="contenedor" class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3 id="qtyOrders">{{ stats.qtyOrders }}</h3>
+                                        <p>Pedidos Registrados</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/pedidos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-danger">
+                                    <div class="inner">
+                                        <h3 id="qtyOrdersToApprove">{{ stats.qtyOrdersToApprove }}</h3>
+                                        <p>Pedidos por Aprobar</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/pedidos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3 id="qtyClients">{{ stats.qtyClients }}</h3>
+                                        <p>Clientes</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="#" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-purple">
+                                    <div class="inner">
+                                        <h3 id="qtyProduct">{{ stats.qtyProducts }}</h3>
+                                        <p>Productos Registrados</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/productos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-7 connectedSortable">
+                                <!-- Draft Orders -->
+                                {% if stats.ordersTemp|length > 0 %}
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-clipboard mr-1"></i>
+                                            Pedidos por Terminar
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="todo-list" data-widget="todo-list">
+                                        {% for order in stats.ordersTemp %}
+                                            <li>
+                                                <!-- drag handle -->
+                                                <span class="handle">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </span>
+                                                <!-- checkbox -->
+                                                <div  class="icheck-primary d-inline ml-2">
+                                                    <input type="checkbox" value="{{ order.sm_order_id|base64 }}" id="{{ order.sm_order_id|base64 }}">
+                                                    <label for="{{ order.sm_order_id|base64 }}"></label>
+                                                </div>
+                                                <!-- todo text -->
+                                                <span class="text">{{ order.partner }}</span>
+                                                <!-- Emphasis label -->
+                                                {% if order.diff_d > 0 %}
+                                                    {% set time, text, flag = order.diff_d, 'Dias', 'danger' %}  
+                                                {% elseif order.diff_h > 0 %}
+                                                    {% set time, text, flag = order.diff_h, 'Horas', 'warning' %} 
+                                                {% elseif order.diff_m > 0 %}
+                                                    {% set time, text, flag = order.diff_m, 'Minutos', 'info' %} 
+                                                {% else %}
+                                                    {% set text, flag = 'Hace segundos', 'success' %}
+                                                {% endif %}
+                                                <small class="badge badge-{{ flag }}">
+                                                    <i class="far fa-clock"></i> 
+                                                    {{ time }} {{ text }}
+                                                </small>
+                                                <!-- General tools such as edit or delete-->
+                                                <div class="tools">
+                                                    <a href="/pedido/temp/{{ order.sm_order_id }}"><i class="fas fa-edit"></i></a>
+                                                    <i data-id="{{ order.sm_order_id }}" onclick="App.Jaxon.Base.actionConfirm('Order', 'delete', this.dataset.id)" class="ml-2 fas fa-trash"></i>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer clearfix">
+                                        <button type="button" class="btn btn-danger float-left"><i class="fas fa-plus"></i> Borrar Pedidos</button>
+                                        <a class="btn btn-primary float-right" href="/pedido"><i class="fas fa-plus"></i> Nuevo Pedido</a>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Last Orders -->
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-clipboard mr-1"></i>
+                                            &Uacute;ltimos Pedidos
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body table-responsive p-0">
+                                        <div class="table table-striped table-valign-middle">
+                                            <table class="table m-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nro.</th>
+                                                        <th>Cliente</th>
+                                                        <th>Estado</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for order in stats.orders %}
+                                                    <tr>
+                                                        <td><a href="/pedido/{{ order.c_order_id }}">{{ order.documentno }}</a></td>
+                                                        <td>{{ order.client }}</td>
+                                                        {% if order.docstatus|lower == 'completo' %} 
+                                                            {% set flag = 'success' %}
+                                                        {% elseif order.docstatus|lower == 'cerrado' %}
+                                                            {% set flag = 'info' %}
+                                                        {% else %}
+                                                            {% set flag = 'warning' %}
+                                                        {% endif %}
+                                                        <td><span class="badge badge-{{ flag }}">{{ order.docstatus }}</span></td>
+                                                        <td><div class="sparkbar" data-color="#00a65a" data-height="20">{{ order.dateordered }}</div></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer clearfix">
+                                        <a class="btn btn-primary float-right" href="/pedidos"><i class="fas fa-plus"></i> Ver Todos los Pedidos</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5 connectedSortable">
+                                <!-- Last Products -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-pricetags mr-1"></i>
+                                            &Uacute;ltimos Productos Agregados
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                                        {% for product in stats.products %}
+                                            <li class="item">
+                                                <div class="product-img">
+                                                    <img src="/assets/img/default-150x150.png" alt="Product Image" class="img-size-50">
+                                                </div>
+                                                <div class="product-info">
+                                                    <a href="javascript:void(0)" class="product-title text-capitalize">
+                                                        {{ product.category|lower }}
+                                                        <span class="badge badge-{% if product.cantidad > 10 %}info{% else %}warning{% endif %} float-right">${{ product.pricelist }}</span>
+                                                    </a>
+                                                    <span class="product-description">{{ product.product }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="/productos" class="uppercase">Ver m&aacute;s Productos</a>
+                                    </div>
+                                </div>
+
+                                <!-- Featured Products -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-pricetags mr-1"></i>
+                                            Productos Destacados
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                                            <li class="item">
+                                                <div class="product-img">
+                                                    <img src="/assets/img/default-150x150.png" alt="Product Image" class="img-size-50">
+                                                </div>
+                                                <div class="product-info">
+                                                    <a href="javascript:void(0)" class="product-title">Samsung TV <span class="badge badge-danger float-right">$1800</span></a>
+                                                    <span class="product-description">Samsung 32" 1080p 60Hz LED Smart HDTV.</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="/productos" class="uppercase">Ver m&aacute;s Productos</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            </div>
+        {% endblock %}
+
+        {{ include('section/sidecontrol.html') }}
+        
+        {{ include('section/footer.html') }}
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+{% endblock %}

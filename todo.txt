@@ -1,0 +1,3 @@
+Clientes:
+    - Listar: https://adminlte.io/themes/v3/pages/examples/contacts.html
+    - Perfil: https://adminlte.io/themes/v3/pages/examples/profile.html

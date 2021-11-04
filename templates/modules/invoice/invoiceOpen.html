@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/home/totto/Proyectos/pedido.sumagroups.com/public/assets/css/adminlte.css">
+    <!-- Datatable -->
+    <link rel="stylesheet" href="/home/totto/Proyectos/pedido.sumagroups.com/public/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+
+{% block wrapper %}
+    <div class="wrapper">
+        <div class="content">
+            <div id="contenedor" class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Facturas Vencidas</h3>
+                            </div>
+                            
+                            <div class="card-body table-responsive px-0">
+                                <table id="invoices-table" class="table table-striped table-valign-middle">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Nro</th>
+                                            <th>Cliente</th>
+                                            <th>Vendedor</th>
+                                            <th>Fecha Cont.</th>
+                                            <th>Fecha Venc.</th>
+                                            <th>Dias Venc.</th>
+                                            <th>Termino de Pago</th>
+                                            <th>Monto</th>
+                                            <th>Estatus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for invoice in invoices %}
+                                        <tr>
+                                            <td class="align-middle"></td>
+                                            <td class="align-middle">
+                                                <a href="/factura/{{ invoice.documentno }}">{{ invoice.documentno }}</a>
+                                            </td>
+                                            <td class="align-middle">{{ invoice.salesrep }}</td>
+                                            <td class="align-middle">{{ invoice.bpartner }}</td>
+                                            <td class="align-middle">{{ invoice.dateacct }}</td>
+                                            <td class="align-middle">{{ invoice.duedate }}</td>
+                                            <td class="align-middle">{{ invoice.daysdue }}</td>
+                                            <td class="align-middle">{{ invoice.paymentterm }}</td>
+                                            <td class="align-middle text-right">{{ invoice.grandtotal }}</td>
+                                            <td class="align-middle">
+                                                {% if invoice.docstatus|lower == 'completo' %} 
+                                                    {% set flag = 'success' %}
+                                                {% elseif invoice.docstatus|lower == 'cerrado' %}
+                                                    {% set flag = 'info' %}
+                                                {% else %}
+                                                    {% set flag = 'warning' %}
+                                                {% endif %}
+                                                <span class="badge badge-{{ flag }}">
+                                                {{ invoice.docstatus }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

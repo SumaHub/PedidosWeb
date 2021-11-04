@@ -1,0 +1,162 @@
+{% extends "modules/dashboard.html" %}
+
+{% block head %}
+    {{ parent() }}
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="/assets/vendor/sweetalert2/sweetalert2.min.css">
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ product.codigo }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <strong><i class="fas fa-book mr-1"></i> Modelo</strong>
+                            <p class="text-muted">{{ product.modelo }}</p>
+                            <hr>
+                            <strong><i class="fas fa-file-alt mr-1"></i> Clasificaci&oacute;n</strong>
+                            <p class="text-muted">{{ product.categoria }}, {{ product.subcategoria }}</p>
+                            <hr>
+                            <strong><i class="fas fa-pencil-alt mr-1"></i> Creado</strong>
+                            <p class="text-muted">
+                                <span class="tag tag-success">{{ product.creadopor }}: {{ product.creado }}</span>
+                            </p>
+                            <hr>
+                            <strong><i class="fas fa-pencil-alt mr-1"></i> Modificado</strong>
+                            <p class="text-muted">
+                                <span class="tag tag-success">{{ product.actualizadopor }}: {{ product.actualizado }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="card">
+                        <div class="card-header p-2">
+                            <ul class="nav nav-pills">
+                                <li class="nav-item"><a class="nav-link active" href="#informacion" data-toggle="tab"><i class="fas fa-clipboard-list mr-1"></i> Informaci&oacute;n</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#imagenes" data-toggle="tab"><i class="fas fa-images mr-1"></i> Im&aacute;genes</a></li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <div class="active tab-pane" id="informacion">
+                                    <form class="form-horizontal">
+                                        <div class="form-group row">
+                                            <label for="marca" class="col-sm-2 col-form-label">Marca</label>
+                                            <div class="col-sm-10">
+                                                <input disabled type="text" class="form-control" id="marca" value="{{ product.marca }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="nombre" class="col-sm-2 col-form-label">Nombre</label>
+                                            <div class="col-sm-10">
+                                                <input disabled type="text" class="form-control" id="nombre" value="{{ product.nombre }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="codigo" class="col-sm-2 col-form-label">C&oacute;digo</label>
+                                            <div class="col-sm-10">
+                                                <input disabled type="text" class="form-control" id="codigo" value="{{ product.codigo }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="sku" class="col-sm-2 col-form-label">SKU</label>
+                                            <div class="col-sm-10">
+                                                <input disabled type="text" class="form-control" id="sku" value="{{ product.sku }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="categoria" class="col-sm-2 col-form-label">Categor&iacute;a</label>
+                                            <div class="col-sm-10">
+                                                <input disabled type="text" class="form-control" id="categoria" value="{{ product.categoria }}">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="tab-pane" id="imagenes">
+                                    <div class="row">
+                                        {% for image in images %}
+                                        <div id="{{ image.id }}" class="col-md-4 col-lg-3 col-xl-3">
+                                            <div class="card mb-2">
+                                                <div class="card-body card-img p-0">
+                                                    <img src="{{ image.downloadurl }}" class="w-100">
+                                                    <div class="btn-group">
+                                                        <div class="btn btn-copy btn-info" data-clipboard-text="{{ image.downloadurl }}">
+                                                            <i class="fas fa-copy"></i>
+                                                        </div>
+                                                        <div class="btn delete btn-danger" data-product="{{ image.codigo }}" data-image="{{ image.name }}">
+                                                            <i class="fas fa-eraser"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <p>{{ image.name }}</p>
+                                                    <p>{{ image.created }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <!-- SweetAlert2 -->
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(function () {
+            $('.card .delete').on('click', function() {
+                Swal.fire({
+                    title: "Esta seguro de eliminar esta imagen",
+                    html: "Esta acci&oacute;n no puede ser revertida posteriormente!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar!",
+                    confirmButtonText: "Borrar!",
+                    confirmButtonColor: "#d33"
+                }).then( (result) => {
+                    if(result.isConfirmed) {
+                        App.Jaxon.Product.delete_image(this.dataset.product, this.dataset.image)
+                    }
+                })
+            })
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            $('.btn-copy').on('click', function () { 
+                Toast.fire({ icon: 'success', title: 'Copiado!' })
+            })
+        })
+    </script>
+
+    <!-- ClipboardJS -->
+    <script src="/node_modules/clipboard/dist/clipboard.min.js"></script>
+    <script>
+        new ClipboardJS('.btn-copy');
+    </script>
+{% endblock %}

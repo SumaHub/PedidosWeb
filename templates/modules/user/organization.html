@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block wrapper %}
+    <div class="login-box">
+        <div class="text-center mb-4">
+            <img src="/assets/img/Logo.png" alt="{{ version }}">
+        </div>
+        <div class="card card-outline card-primary">
+            <div class="card-body">
+                <p class="login-box-msg">Seleccione una organizaci&oacute;n</p>
+
+                <form id="option" onsubmit="event.preventDefault(); $('#submit').click();">
+                    <div class="input-group mb-3">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-store"></span>
+                            </div>
+                        </div>
+                        <select name="organization" id="organization" class="form-control" required>
+                            {% for organization in organizations %}
+                                <option value="{{ organization.ad_org_id }}">{{ organization.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-warehouse"></span>
+                            </div>
+                        </div>
+                        <select name="warehouse" id="warehouse" class="form-control" required>
+                            {{ warehouses }}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <button type="submit" style="display: none;"></button>
+                            <button id="submit" type="button" class="btn btn-primary btn-block">Ingresar</button>
+                        </div>
+                    </div>
+                </form>
+
+                <p class="mt-2 mb-1">
+                    <small class="float-right">{{ version }}</small>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script>App.Jaxon.Organization.init();</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        {{ include('section/head.html') }}
+
+        {{ include('section/stylesheet.html') }}
+
+    </head>
+    <body class="hold-transition sidebar-mini layout-fixed">
+
+        <div class="wrapper">
+            <!-- Preloader -->
+            <div class="preloader flex-column justify-content-center align-items-center">
+                <img class="animation__shake" src="/assets/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+            </div>
+            
+            {{ include('section/navbar.html') }}
+
+            {{ include('section/sidebar.html') }}
+
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1 class="m-0">Usuario</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item"><a href="#">Usuario</a></li>
+                                    <li class="breadcrumb-item active">Lista</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <!-- Main content -->
+                        <div class="content">
+                            <div id="contenedor" class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                              <h3 class="card-title">Usuarios Registrados</h3>
+                                            </div>
+                                            <!-- /.card-header -->
+                                            
+                                            <div class="card-body p-0">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Nombre</th>
+                                                            <th>Rol</th>
+                                                            <th>Ult. Ingreso</th>
+                                                            <th>Estatus</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>1</td>
+                                                            <td>Alfredo Duran</td>
+                                                            <td>Dise&ntilde;ador</td>
+                                                            <td>2021/08/26</td>
+                                                            <td><span class="badge bg-success">Activo</span></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- /.card-body -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{ include('section/sidecontrol.html') }}
+            
+            {{ include('section/footer.html') }}
+
+        </div>
+
+        {{ include('section/javascript.html') }}
+
+    </body>
+</html>

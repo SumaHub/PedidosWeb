@@ -1,0 +1,13 @@
+1) Revisar el archivo App\Constants
+
+2) Revisar los Table_ID de cada Modelo
+
+3) Cambiar la IP de la Base de Datos
+
+4) Borrar la cache del sistema
+
+5) Cambiar credenciales de correo
+
+6) Crear columna NotificationNode en C_Order 
+
+7) Cambiar permisos de la carpeta public/temp

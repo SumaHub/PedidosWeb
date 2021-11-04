@@ -1,0 +1,365 @@
+{% extends "modules/dashboard.html" %}
+
+{% block head %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-searchbuilder-bs4/css/searchBuilder.bootstrap4.min.css">
+{% endblock %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <form id="pedidoDatos">
+                        <div class="card card-outline card-info">
+                            <div class="card-header">
+                                <h3 class="card-title">Nuevo Pedido</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="organizacion">Organizaci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-building"></i>
+                                                    </span>
+                                                </div>
+                                                <select id="organizacion" name="organizacion" class="form-control" disabled>
+                                                    <option value="0">-- Seleccione una Opci&oacute;n --</option>
+                                                    {% for organization in organizations %}
+                                                        <option value="{{ organization.ad_org_id }}" {% if organization.isdefault == 'Y' %} selected {% endif %}>{{ organization.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="codigo">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="tercero" name="tercero" type="text" class="form-control" value="{{ order.value }}" onkeyup="if(event.keyCode == 13){ $('#seleccionarCliente').click(); }" placeholder="Nombre o RIF" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="codigo">Descripci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="descripcion" name="descripcion" type="text" class="form-control" value="{{ order.bpartner }}" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="direccion">Direcci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-map"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="direccion" id="direccion" type="text" class="form-control" disabled>
+                                                {% for location in order.locations %}
+                                                    <option value="{{ location.c_bpartner_location_id }}">{{ location.address1 }}</option>
+                                                {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="telefono">Tel&eacute;fono</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-phone"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="telefono" type="text" class="form-control" value="{{ order.phone }}" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="moneda">Moneda</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-dollar-sign"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="moneda" id="moneda" class="form-control" disabled>
+                                                    <option value="100">USD</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="precio">Lista de Precio</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="precio" id="precio" class="form-control" disabled>
+                                                    {{ pricelists }}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="termino">T&eacute;rmino de Pago</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-hand-holding-usd"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="termino" id="termino" class="form-control" disabled>
+                                                    <option value="0">-- Seleccione una Opci&oacute;n --</option>
+                                                    {% for term in terms %}
+                                                        <option value="{{ term.c_paymentterm_id }}"  {% if term.isdefault == 'Y' %} selected {% endif %}>{{ term.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">C&oacute;digo</th>
+                                        <th class="text-center">Precio</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos">
+                                    {% for orderline in order.orderlines %}
+                                    <tr class="text-center">
+                                        <td>{{ orderline.line }}</td>
+                                        <td class="text-left">{{ orderline.product }}</td>
+                                        <td>{{ orderline.value }}</td>
+                                        <td class="text-right">{{ number_format(orderline.pricelist, 2) }}</td>
+                                        <td class="text-right" style="cursor: pointer;" id="{{ orderline.sm_orderline_id|base64 }}">
+                                            <p data-line="{{ orderline.sm_orderline_id }}" onclick="App.Jaxon.OrderLine.changeQty(this.dataset.line)">{{ number_format(orderline.qtyentered, 2) }}</p>
+                                        </td>
+                                        <td class="text-right" id="{{ (orderline.sm_orderline_id ~ 'amt')|base64 }}">
+                                            {{ number_format(orderline.linenetamt, 2) }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="totallines">Sub Total</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                </span>
+                                            </div>
+                                            <input id="totallines" type="text" value="0.00" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="taxamt">Impuestos</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-balance-scale"></i>
+                                                </span>
+                                            </div>
+                                            <input id="taxamt" type="text" value="0.00" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="grandtotal">Total</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-receipt"></i>
+                                                </span>
+                                            </div>
+                                            <input id="grandtotal" type="text" value="0.00" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="mx-1 btn btn-lg btn-success"><i class="far fa-envelope"></i> Enviar Pedido</button>
+                                <button type="button" class="mx-1 btn btn-lg btn-warning"><i class="far fa-copy"></i> Clonar Pedido</button>
+                                <button type="button" class="mx-1 btn btn-lg btn-info"><i class="fas fa-print"></i> Imprimir Pedido</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal fade" id="clientModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Cliente</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#buscarCliente').click();">
+                                        <div class="form-group">
+                                            <label for="codigo_cliente">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="codigo_cliente" type="text" class="form-control" placeholder="Nombre o RIF">
+                                                <div class="input-group-prepend">
+                                                    <button id="buscarCliente" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="clientes" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Producto</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#buscarProducto').click();">
+                                        <div class="form-group">
+                                            <label for="codigo_producto">Producto</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-boxes"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="codigo_producto" type="text" class="form-control" placeholder="Nombre, C&oacute;digo o SKU">
+                                                <div class="input-group-prepend">
+                                                    <button id="buscarProducto" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="productos" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script src="/node_modules/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="/node_modules/jszip/dist/jszip.min.js"></script>
+    <script src="/node_modules/pdfmake/build/pdfmake.min.js"></script>
+    <script src="/node_modules/pdfmake/build/vfs_fonts.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder/js/dataTables.searchBuilder.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder-bs4/js/searchBuilder.bootstrap4.min.js"></script>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

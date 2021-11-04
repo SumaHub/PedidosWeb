@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/home/totto/Proyectos/pedido.sumagroups.com/public/assets/css/adminlte.css">
+    <!-- Datatable -->
+    <link rel="stylesheet" href="/home/totto/Proyectos/pedido.sumagroups.com/public/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+
+{% block wrapper %}
+    <div class="wrapper">
+        <div class="content">
+            <div id="contenedor" class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Productos Nuevos</h3>
+                            </div>
+                            
+                            <div class="card-body table-responsive px-0">
+                                <table id="products-table" class="table table-striped table-valign-middle">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>No</th>
+                                            <th>Marca</th>
+                                            <th>Organizaci&oacute;n</th>
+                                            <th>Documento</th>
+                                            <th>Producto</th>
+                                            <th>Fecha</th>
+                                            <th>Estatus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for product in products %}
+                                        <tr>
+                                            <td class="align-middle"></td>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ product.brand }}</td>
+                                            <td>{{ product.organization }}</td>
+                                            <td>{{ product.doctype }}: {{ product.documentno }}</td>
+                                            <td>{{ product.value }}</td>
+                                            <td>
+                                                {% if product.iscoming|lower == 'y' %}
+                                                    {% set flag = 'info' %} 
+                                                {% else %} 
+                                                    {% set flag = 'success' %} 
+                                                {% endif %}  
+                                                <span class="badge badge-{{ flag }}">{{ product.datepromised }}</span>
+                                            </td>
+                                            <td class="align-middle">
+                                                {% if product.isnew|lower == 'y' %} 
+                                                    {% set status, flag = 'Nuevo', 'success' %}
+                                                {% elseif product.isresupply|lower == 'y' %}
+                                                    {% set status, flag = 'Reabastecimiento', 'warning' %}
+                                                {% endif %}
+                                                <span class="badge badge-{{ flag }}">
+                                                {{ status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

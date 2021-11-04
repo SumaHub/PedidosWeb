@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block wrapper %}
+    <div class="login-box">
+        <div class="text-center mb-4">
+            <img src="/assets/img/Logo.png" alt="{{ version }}">
+        </div>
+        <div class="card card-outline card-primary">
+            <div class="card-body">
+                <p class="login-box-msg">Ingresa los datos para iniciar la sesi&oacute;n</p>
+
+                <form id="login" onsubmit="event.preventDefault(); $('#submit').click();">
+                    <div class="input-group mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Correo" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Contrase&ntilde;a" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="remember" name="remember">
+                                <label for="remember">
+                                    Recu&eacute;rdame
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button type="submit" style="display: none;"></button>
+                            <button id="submit" type="button" class="btn btn-primary btn-block">Ingresar</button>
+                        </div>
+                    </div>
+                </form>
+
+                <p class="mt-2 mb-1">
+                    <a href="#"><small>Ha olvidado su contrase&ntilde;a</small></a>
+                    <small class="float-right">{{ version }}</small>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script>App.Jaxon.User.init();</script>
+{% endblock %}
