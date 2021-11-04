@@ -29,5 +29,6 @@
 /build/scss/
 /public/node_modules/
 /public/vendor/
+/public/vendor/
 /public/assets/vendor/
 ###< resources ###
