@@ -25,8 +25,8 @@ facturas:
   controller: App\Controller\InvoiceController::pdfAction
 
 analisis_vencimiento:
-  path: /antiguedad
-  controller: App\Controller\InvoiceController::getInvoicerOpen
+  path: /analisis-de-vencimiento
+  controller: App\Controller\InvoiceController::getOpen
 
 # Jaxon Request URI
 jaxon:

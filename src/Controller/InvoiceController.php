@@ -19,7 +19,7 @@ Class InvoiceController extends BaseController
      * 
      * @return object Symfony\Component\HttpFoundation\Response
      */
-    public function getInvoicerOpen(Jaxon $jaxon)
+    public function getOpen(Jaxon $jaxon)
     {
         if(Util::VerifySession()) return $this->logout();
 

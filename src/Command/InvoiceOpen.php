@@ -99,6 +99,7 @@ class InvoiceOpen extends Command
                             'version'       => 'Versi&oacute;n 2.0.0',
                             'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                             'modulo'        => 'Facturas',
+                            'user'          => $user,
                             'invoices'      => $invoices
                         ]);
 

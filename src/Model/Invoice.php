@@ -32,16 +32,19 @@ class Invoice
         if($db->IsConnected()){
             $invoices = $db->Execute(
                 "SELECT DISTINCT
-                    ci.C_Invoice_ID, 
-                    cdt.Name AS DocType, ci.DocumentNo, arl_t.Name AS DocStatus, ci.NotificationNode,
+                    ao.AD_Org_ID, ao.Name AS Organization,
+                    cb.C_BPartner_ID, cb.Name AS BPartner, cb.Saldo_CXC_USD, 
+                    au_s.AD_User_ID, au_s.Name AS SalesRep,
+                    ci.C_Invoice_ID, ci.DocumentNo,
+                    cdt.Name AS DocType, arl_t.Name AS DocStatus, ci.NotificationNode,
                     ci.DateAcct::date, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)::date AS DueDate,
                     cpt.name AS PaymentTerm, daysbetween(current_timestamp, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)) AS DaysDue,
-                    invoiceopentodate(ci.C_Invoice_ID, cips.C_InvoicePaySchedule_ID, current_date) AS DueAmt, ci.TotalLines, ci.GrandTotal,
-                    au_s.Name AS SalesRep, cb.Name AS BPartner
+                    invoiceopentodate(ci.C_Invoice_ID, cips.C_InvoicePaySchedule_ID, current_date) AS DueAmt, ci.TotalLines, ci.GrandTotal
                 FROM C_Invoice ci
+                JOIN AD_Org ao ON ao.AD_Org_ID = ci.AD_Org_ID  
                 JOIN C_BPartner cb ON cb.C_BPartner_ID = ci.C_BPartner_ID
                 -- Terceros
-                JOIN AD_User au_s ON au.AD_User_ID = ci.SalesRep_ID
+                JOIN AD_User au_s ON au_s.AD_User_ID = ci.SalesRep_ID
                 JOIN SM_Sales_Rep ssr ON ssr.C_BPartner_ID = cb.C_BPartner_ID 
                 JOIN C_DocType cdt ON cdt.C_DocType_ID = ci.C_DocType_ID 
                 -- Terminos de Pago
@@ -73,11 +76,11 @@ class Invoice
                     -- Dias de Vencimiento
                     AND daysbetween(current_timestamp, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)) > 0
                     -- Busca las facturas notificadas previamente al nodo actual
-                    AND CASE WHEN $NotificationNode IS NOT NULL
+                    AND CASE WHEN $NotificationNode > 0
                         THEN ci.NotificationNode::numeric = $NotificationNode - 1
                         ELSE true
                     END
-                ORDER BY ci.DateAcct::date DESC"
+                ORDER BY ao.AD_Org_ID, cb.C_BPartner_ID, ci.DateAcct::date DESC"
             ) ;
         } else {
             $msj    = $db->ErrorMsg();
