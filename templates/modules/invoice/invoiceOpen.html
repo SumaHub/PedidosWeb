@@ -18,14 +18,22 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Facturas Vencidas</h3>
+                                <div class="row">
+                                    <div class="col-6 d-flex flex-column align-items-start justify-content-center">
+                                        <h3 class="card-title">Facturas Vencidas</h3>
+                                        <h3 class="card-title">{{ "now"|date("Y/m/d") }}</h3>
+                                    </div>
+                                    <div class="col-6 d-flex flex-column align-items-end justify-content-center">
+                                        <h3 class="card-title">{{ user.name }}</h3>
+                                        <h3 class="card-title"><a href="mailto:{{ user.email }}">{{ user.email }}</a></h3>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="card-body table-responsive px-0">
                                 <table id="invoices-table" class="table table-striped table-valign-middle">
                                     <thead>
                                         <tr>
-                                            <th></th>
                                             <th>Nro</th>
                                             <th>Cliente</th>
                                             <th>Vendedor</th>
@@ -38,9 +46,16 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    {% set bpartner_id = 0 %}
                                     {% for invoice in invoices %}
+                                        {% if invoice.c_bpartner_id != bpartner_id %}
                                         <tr>
-                                            <td class="align-middle"></td>
+                                            <td class="align-middle text-left" colspan="7">{{ invoice.bpartner }}</td>
+                                            <td class="align-middle text-right" colspan="2">{{ invoice.saldo_cxc_usd }}</td>
+                                        </tr>
+                                        {% endif %}
+
+                                        <tr>
                                             <td class="align-middle">
                                                 <a href="/factura/{{ invoice.documentno }}">{{ invoice.documentno }}</a>
                                             </td>
@@ -50,7 +65,7 @@
                                             <td class="align-middle">{{ invoice.duedate }}</td>
                                             <td class="align-middle">{{ invoice.daysdue }}</td>
                                             <td class="align-middle">{{ invoice.paymentterm }}</td>
-                                            <td class="align-middle text-right">{{ invoice.grandtotal }}</td>
+                                            <td class="align-middle text-right">{{ invoice.grandtotal }} <span class="text-danger">({{ invoice.dueamt }})</span></td>
                                             <td class="align-middle">
                                                 {% if invoice.docstatus|lower == 'completo' %} 
                                                     {% set flag = 'success' %}
@@ -64,6 +79,8 @@
                                                 </span>
                                             </td>
                                         </tr>
+
+                                        {% set bpartner_id = invoice.c_bpartner_id %}
                                     {% endfor %}
                                     </tbody>
                                 </table>
