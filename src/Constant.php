@@ -63,4 +63,10 @@ class Constant
      * @return int CONTADO
      */
     public const DocStatus = 'DR';
+
+    /**
+     * Ruta Home del usuario web
+     * @return string Ruta
+     */
+    public const HOME_PATH = 'totto/Proyectos/';
 }
