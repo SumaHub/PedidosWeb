@@ -39,7 +39,9 @@ class Invoice
                     cdt.Name AS DocType, arl_t.Name AS DocStatus, ci.NotificationNode,
                     ci.DateAcct::date, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)::date AS DueDate,
                     cpt.name AS PaymentTerm, daysbetween(current_timestamp, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)) AS DaysDue,
-                    invoiceopentodate(ci.C_Invoice_ID, cips.C_InvoicePaySchedule_ID, current_date) AS DueAmt, ci.TotalLines, ci.GrandTotal
+                    currencyconvert(invoiceopentodate(ci.C_Invoice_ID, cips.C_InvoicePaySchedule_ID, current_date), ci.C_Currency_ID, 100, ci.DateAcct, ci.C_ConversionType_ID, ci.AD_Client_ID, ci.AD_Org_ID) AS DueAmt, 
+                    currencyconvert(ci.TotalLines, ci.C_Currency_ID, 100, ci.DateAcct, ci.C_ConversionType_ID, ci.AD_Client_ID, ci.AD_Org_ID) AS TotalLines, 
+                    currencyconvert(ci.GrandTotal, ci.C_Currency_ID, 100, ci.DateAcct, ci.C_ConversionType_ID, ci.AD_Client_ID, ci.AD_Org_ID) AS GrandTotal
                 FROM C_Invoice ci
                 JOIN AD_Org ao ON ao.AD_Org_ID = ci.AD_Org_ID  
                 JOIN C_BPartner cb ON cb.C_BPartner_ID = ci.C_BPartner_ID
@@ -76,8 +78,9 @@ class Invoice
                     -- Dias de Vencimiento
                     AND daysbetween(current_timestamp, paymenttermduedate(ci.C_PaymentTerm_ID, ci.DateAcct)) > 0
                     -- Busca las facturas notificadas previamente al nodo actual
-                    AND CASE WHEN $NotificationNode > 0
-                        THEN ci.NotificationNode::numeric = $NotificationNode - 1
+                    AND CASE 
+                        WHEN $NotificationNode = 3 THEN ci.NotificationNode::numeric IN (2, 3)
+                        WHEN $NotificationNode > 0 THEN ci.NotificationNode::numeric = $NotificationNode - 1
                         ELSE true
                     END
                 ORDER BY ao.AD_Org_ID, cb.C_BPartner_ID, ci.DateAcct::date DESC"
