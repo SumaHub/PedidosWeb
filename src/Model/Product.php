@@ -282,16 +282,32 @@ class Product
         if($db->IsConnected()){
             $products = $db->Execute(
                 "SELECT 
-                    sm.name AS Brand, ao.name AS Organization, 
-                    cd.name AS DocType, co.DocumentNo, co.DateOrdered, co.DatePromised, 
-                    np.M_Product_ID, np.Value, np.SKU, 
-                    np.IsNew, np.IsResupply, np.por_llegar AS IsComing
+                    sm.Name AS Brand, ao.Name AS Organization, 
+                    cd.Name AS DocType, co.DocumentNo AS Order, co.DocStatus AS OrderStatus, co.SM_Preform, co.Description AS OrderDescription,
+                    co.SM_ContainerQty, co.Totallines, co.Grandtotal,
+                    co.C_Order_ID, co.DateOrdered::date, co.DatePromised::date, 
+                    cb.C_BPartner_ID, cb.Name AS BPartner,
+                    mp.M_Product_ID, mp.Value, mp.SKU, mp.Description,
+                    col.C_Orderline_ID, col.QtyOrdered, col.QtyReserved,
+                    mil.M_Inoutline_ID, mi.M_Inout_ID, mi.DocumentNo AS Receipt, mi.DateAcct::date AS ReceiptDateAcct, mi.SM_Fecha_ETA, mi.SM_Fecha_ETD, mi.DocStatus AS ReceiptStatus, coalesce(mil.qtyentered, 0) AS QtyReceipt, mi.SM_InvoiceDocumentNo, mi.SM_InvoiceFiles,
+                    milc.M_InoutlineConfirm_ID, mic.M_InoutConfirm_ID, mic.DocumentNo AS Confirm, mic.DocStatus AS ConfirmStatus,
+                    cil.C_Invoiceline_ID, ci.C_Invoice_ID, ci.DocumentNo AS Invoice, ci.DateAcct::date AS InvoiceDateAcct, ci.DocStatus AS InvoiceStatus, coalesce(cil.QtyEntered, 0) AS QtyInvoiced,
+                    CASE WHEN np.IsNew = 'Y' THEN 'Nuevo' WHEN np.IsResupply = 'Y' THEN 'Reabastecimiento' ELSE '' END AS Status, np.por_llegar AS IsComing
                 FROM SM_RV_NewProduct_v np
                 JOIN SM_Marca sm ON sm.SM_Marca_ID = np.SM_Marca_ID
                 JOIN AD_Org ao ON ao.AD_Org_ID = np.AD_Org_ID
                 JOIN C_Order co ON co.C_Order_ID = np.C_Order_ID
+                JOIN C_Orderline col ON col.C_Orderline_ID = np.C_Orderline_ID
+                LEFT JOIN M_InOutLine mil ON mil.C_Orderline_ID = col.C_Orderline_ID
+                LEFT JOIN M_Inout mi ON mi.M_Inout_ID = mil.M_Inout_ID
+                LEFT JOIN M_InoutlineConfirm milc ON milc.M_Inoutline_ID = mil.M_Inoutline_ID
+                LEFT JOIN M_InoutConfirm mic ON mic.M_InoutConfirm_ID = milc.M_InoutConfirm_ID
+                LEFT JOIN C_Invoiceline cil ON cil.M_Inoutline_ID = mil.M_Inoutline_ID or cil.C_Orderline_ID = col.C_Orderline_ID
+                LEFT JOIN C_Invoice ci ON ci.C_Invoice_ID = cil.C_Invoice_ID
+                JOIN C_BPartner cb ON cb.C_BPartner_ID = co.C_BPartner_ID
+                JOIN M_Product mp ON mp.M_Product_ID = np.M_Product_ID
                 JOIN C_DocType cd ON cd.C_DocType_ID = co.C_DocType_ID
-                WHERE CASE WHEN $M_Product_ID > 0 THEN np.M_Product_ID = $M_Product_ID ELSE true END"
+                WHERE co.IsSOTrx = 'N' AND CASE WHEN $M_Product_ID > 0 THEN np.M_Product_ID = $M_Product_ID ELSE true END"
             );
         } else {
             $msj = $db->ErrorMsg();
