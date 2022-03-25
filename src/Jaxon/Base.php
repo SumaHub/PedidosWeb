@@ -2,8 +2,11 @@
 
 namespace App\Jaxon;
 
+use App\Service\Manager;
 use App\Util;
+use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\Response\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class Base extends \Jaxon\CallableClass
 {
@@ -53,6 +56,21 @@ class Base extends \Jaxon\CallableClass
         ]
     ];
 
+    protected $manager;
+
+    /**
+     * Propiedad que guarda las variables de sesion
+     * 
+     * @var Session Manejador de Sesion
+     */
+    protected $session;
+
+    public function __construct(ManagerRegistry $manager)
+    {
+        $this->manager = $manager;
+        $this->session = new Session();
+    }
+    
     public function actionConfirm(
         String $controller,
         String $action,
@@ -84,16 +102,6 @@ class Base extends \Jaxon\CallableClass
         return $jxnr;
     }
 
-    /**
-     * Construye respuesta html de alerta SweetAlert2
-     * para manejar los errores
-     * 
-     * @param string $title Titulo de la alerta
-     * @param string $text Texto descriptivo
-     * @param string $detail Detalles del error
-     * 
-     * @return string Respuesta HTML
-     */
     public static function displayError(
         String $title,
         String $text,

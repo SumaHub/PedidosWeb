@@ -3,13 +3,25 @@
 {% block wrapper %}
     <div class="login-box">
         <div class="text-center mb-4">
-            <img src="/assets/img/Logo.png" alt="{{ version }}">
+            <img src="/assets/img/logo.png" width="250" alt="{{ version }}">
         </div>
         <div class="card card-outline card-primary">
             <div class="card-body">
-                <p class="login-box-msg">Seleccione una organizaci&oacute;n</p>
+                <p class="login-box-msg">Seleccione sus datos</p>
 
                 <form id="option" onsubmit="event.preventDefault(); $('#submit').click();">
+                    <div class="input-group mb-5">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                        <select name="role" id="role" class="form-control" required>
+                            {% for role in roles %}
+                                <option value="{{ role.ad_role_id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="input-group mb-3">
                         <div class="input-group-append">
                             <div class="input-group-text">
@@ -17,8 +29,9 @@
                             </div>
                         </div>
                         <select name="organization" id="organization" class="form-control" required>
+                            <option value="0" selected>-- Seleccione una Organizaci&oacute;n --</option>
                             {% for organization in organizations %}
-                                <option value="{{ organization.ad_org_id }}">{{ organization.nombre }}</option>
+                                <option value="{{ organization.ad_org_id }}">{{ organization.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -54,6 +67,5 @@
 
 {% block javascript %}
     {{ parent() }}
-
     <script>App.Jaxon.Organization.init();</script>
 {% endblock %}

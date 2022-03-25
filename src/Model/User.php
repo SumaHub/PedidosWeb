@@ -3,8 +3,10 @@
 namespace App\Model;
 
 use App\Controller\DBController;
+use App\Repository\AdUserRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
-class User
+class User 
 {
     /**
      * Obtiene los datos de un usuario
@@ -40,6 +42,24 @@ class User
     }
 
     /**
+     * Obten un usuario por su correo
+     * 
+     * @param string $email Correo del usuario
+     * 
+     * @return array Datos del usuario
+     */
+    public function get_by_email(
+        String $email = null
+    )
+    {
+        return $this->repository->findBy(
+            ['email' => $email],
+            null,
+            1
+        );
+    }
+
+    /**
      * Obten usuarios por rol
      * 
      * @param int $AD_Rol_ID Identificador del rol
@@ -55,11 +75,14 @@ class User
 
         if($db->IsConnected()){
             $users = $db->Execute(
-                "SELECT au.AD_User_ID AS id, au.AD_User_ID, au.Email, au.Name, LOWER(au.Description) AS Description, au.Password, au.Salt, cb.IsSalesRep 
+                "SELECT 
+                    ar.AD_Role_ID, ar.Name AS role,
+                    au.AD_User_ID AS id, au.AD_User_ID, au.Email, au.Name, LOWER(au.Description) AS Description, au.Password, au.Salt, cb.IsSalesRep 
                 FROM AD_User au 
                 LEFT JOIN C_BPartner cb ON cb.C_BPartner_ID = au.C_BPartner_ID
                 JOIN AD_User_Roles aur ON aur.AD_User_ID = au.AD_User_ID
-                WHERE au.IsActive = 'Y' AND au.Email IS NOT NULL 
+                JOIN AD_Role ar ON ar.AD_Role_ID = aur.AD_Role_ID
+                WHERE au.IsActive = 'Y' AND au.Email IS NOT NULL AND ar.Isactive = 'Y' AND aur.Isactive = 'Y'
                 AND CASE WHEN $AD_Role_ID > 0 THEN aur.AD_Role_ID = $AD_Role_ID ELSE aur.AD_Role_ID > 0 END"
             );
         } else {

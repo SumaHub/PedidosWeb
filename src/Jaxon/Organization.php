@@ -2,31 +2,41 @@
 
 namespace App\Jaxon;
 
+use App\Entity\AdOrg;
+use App\Entity\MWarehouse;
 use App\Model\Organization as ModelOrg;
 use Jaxon\Response\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
-class Organization extends Base
+class Organization extends Base implements Template
 {
-    /**
-     * Obtiene las organizaciones a las que el 
-     * usuario tiene acceso en el sistema iDempiere
-     * 
-     * @param int $AD_User_ID Identificador del Usuario
-     * 
-     * @return string|ADORecordSet Mensaje de error | Organizaciones
-     */
-    public static function getOrganizations(
-        Int $AD_User_ID = null
-    )
+    public function get(Int $id)
     {
-        $model = new ModelOrg;
-        return $model->get_organizations($AD_User_ID ?: $_SESSION['user']['ad_user_id']);
+        return $this->manager->getRepository(AdOrg::class)->find($id);
     }
 
-    public static function getPaymentTerms()
+    public function getAll(Int $foreign_key = 0)
     {
-        $model = new ModelOrg;
-        return $model->get_paymentterms();
+        
+    }
+
+    /**
+     * Obtiene todos los almacenes de una organizacion
+     * @param int $ad_org_id Identificador de la organizacion
+     * @return array
+     */
+    public function getWarehouses(Int $ad_org_id)
+    {
+        $jxnr = new Response;
+        $organization = $this->manager->getRepository(AdOrg::class)->find($ad_org_id);
+        $warehouses = $organization->getMWarehouse();
+
+        $html = '';
+        foreach ($warehouses as $warehouse) {
+            $html .= '<option value="' . $warehouse->getMWarehouseId() . '">' . $warehouse->getName() . '</option>';
+        }
+        $jxnr->assign('warehouse', 'innerHTML', $html);
+        return $jxnr;
     }
 
     public function getPricelist(Int $organization)
@@ -41,25 +51,12 @@ class Organization extends Base
         $jxnr->assign('precio', 'innerHTML', $html);
         return $jxnr;
     }
-
-    public static function getWarehouse(Int $organization = null)
-    {
-        $jxnr   = new Response;
-        $model  = new ModelOrg;
-
-        $warehouses = $model->get_warehouses($organization);
-        $html       = '';
-        foreach ($warehouses as $warehouse) {
-            $html .= '<option value="'. $warehouse['m_warehouse_id'] .'">'. $warehouse['name'] .'</option>';
-        }
-        return $jxnr->assign('warehouse', 'innerHTML', $html);
-    }
-
+    
     public static function init()
     {
         $jxnr = new Response;
         $jxnr
-            ->setEvent('organization', 'onchange', rq('App.Jaxon.Organization')->call('getWarehouse', pm()->select('organization')))
+            ->setEvent('organization', 'onchange', rq('App.Jaxon.Organization')->call('getWarehouses', pm()->select('organization')))
             ->setEvent('submit', 'onclick', rq('App.Jaxon.Organization')->call('setOption', pm()->form('option')));
         return $jxnr;
     }
@@ -67,8 +64,15 @@ class Organization extends Base
     public function setOption(Array $options)
     {
         $jxnr = new Response;
-        $model= new ModelOrg;
-        $_SESSION['organization'] = $model->get_organization($options['organization'], $options['warehouse']);
+        $session = new Session();
+
+        if( empty($options['organization']) || $options['organization'] == 0 )
+            return $jxnr->alert('Por favor, seleccione una organizacion!');
+
+        $session->set('role', $this->manager->getRepository(AdOrg::class)->find($options['role']));
+        $session->set('organization', $this->manager->getRepository(AdOrg::class)->find($options['organization']));
+        $session->set('warehouse', $this->manager->getRepository(MWarehouse::class)->find($options['warehouse']));
+
         return $jxnr->redirect("/dashboard");
     }
 
@@ -80,25 +84,6 @@ class Organization extends Base
         $html           = '';
         foreach ($priceList as $list) {
             $html .= '<option value="'.$list['m_pricelist_id'].'">'.$list['nombre'].'</option>';
-        }
-        return $html;
-    }
-
-    public static function setWarehouse(Int $organization = null)
-    {
-        $model = new ModelOrg;
-
-        // Si no se suministra el parametro de organizacion
-        if( is_null($organization) ) {
-            $organizations  = self::getOrganizations(); 
-            $organizations  = $organizations->fetchRow();
-            $organization   = $organizations['ad_org_id'];
-        } 
-
-        $warehouses = $model->get_warehouses($organization ?: $organizations['ad_org_id']);
-        $html       = '';
-        foreach ($warehouses as $warehouse) {
-            $html .= '<option value="'. $warehouse['m_warehouse_id'] .'">'. $warehouse['name'] .'</option>';
         }
         return $html;
     }

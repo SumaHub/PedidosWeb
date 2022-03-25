@@ -2,10 +2,26 @@
 
 namespace App;
 
+use Symfony\Component\HttpFoundation\Session\Session;
+
 class Util
 {
+    /**
+     * Codifica la clave con el mismo proceso que iDempiere
+     * @param string $salt Cadena de codificacion
+     * @param string $clave Clave secreta de usuario
+     * @return string $seed Clave convertia
+     */
+    public static function Encode(String $salt, String $password){
+
+        $seed = hash("sha512", self::Hex2String($salt) . $password, true);
+        for($i = 0; $i < 1000; $i++){ 
+            $seed = hash("sha512", $seed, true); 
+        }
+        return $seed;
+    }
+
     /** 
-     * String2Hex
      * Convertir datos binarios en valores hexadecimales
      * @param string $string
      * @return string
@@ -13,30 +29,11 @@ class Util
     public static function String2Hex($string){ return bin2hex($string); }
      
     /** 
-     * Hex2String
      * Convertir una valores hexadecimales en datos binarios
      * @param string $string
      * @return string
      */
     public static function Hex2String($hex){ return hex2bin($hex); }
-
-    /** 
-     * GetCache
-     * Retorna el estatus de la cache de los exploradores
-     * @param string $string
-     * @return boolean
-     */
-    public static function GetCache(){ return ( isset($_SERVER['HTTP_CACHE_CONTROL']) ) ? $_SERVER['HTTP_CACHE_CONTROL'] : "no-cache"; }
-
-    /** 
-     * VerifySession
-     * Verifica las variables de sesion y la memoria cache del cliente
-     * @param string $string
-     * @return boolean
-     */
-    public static function VerifySession(){
-        return ( !isset($_SESSION['user']) ) ? true : false;
-    }
 
     public static function WriteLog(String $text)
     {

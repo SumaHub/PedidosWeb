@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="/node_modules/datatables.net-searchbuilder-bs4/css/searchBuilder.bootstrap4.min.css">
 {% endblock %}
 
+{% block content_action %}
+<button type="button" class="btn btn-outline-info">
+    <i class="fa fa-plus"></i> Filtrar &Oacute;rdenes
+</button>
+<a href="/pedido" class="btn btn-primary">
+    <i class="fa fa-plus"></i> Nueva &Oacute;rden
+</a>
+{% endblock %}
+
 {% block content %}   
     <div class="content">
         <div id="contenedor" class="container-fluid">
@@ -36,21 +45,21 @@
                                     <tr>
                                         <td class="align-middle"></td>
                                         <td class="align-middle">
-                                            <a href="/pedido/{{ order.documentno }}">{{ order.documentno }}</a>
+                                            <a href="/pedido/{{ order.getDocumentno }}">{{ order.getDocumentno }}</a>
                                         </td>
-                                        <td class="align-middle">{{ order.partner }}</td>
-                                        <td class="align-middle">{{ order.dateacct }}</td>
-                                        <td class="align-middle text-right">{{ order.grandtotal }}</td>
+                                        <td class="align-middle">{{ order.getCBpartner.getName }}</td>
+                                        <td class="align-middle">{{ order.getDateordered|date('Y-m-d') }}</td>
+                                        <td class="align-middle text-right">{{ order.getGrandtotal }}</td>
                                         <td class="align-middle">
-                                            {% if order.docstatus|lower == 'completo' %} 
+                                            {% if order.getDocstatus|lower == 'co' %} 
                                                 {% set flag = 'success' %}
-                                            {% elseif order.docstatus|lower == 'cerrado' %}
+                                            {% elseif order.getDocstatus|lower == 'cl' %}
                                                 {% set flag = 'info' %}
                                             {% else %}
                                                 {% set flag = 'warning' %}
                                             {% endif %}
                                             <span class="badge badge-{{ flag }}">
-                                            {{ order.docstatus }}
+                                            {{ order.getDocstatus }}
                                             </span>
                                         </td>
                                     </tr>
@@ -96,7 +105,8 @@
             lengthChange: false, 
             autoWidth: false, 
             dom: '<"row px-4"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>><"row"<"col-sm-12"rt>><"row px-4"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>', 
-            buttons: ["csv", "excel", "pdf", "print"] 
+            buttons: ["csv", "excel", "pdf", "print"],
+            deferRender: true
         })
     </script>
 {% endblock %}

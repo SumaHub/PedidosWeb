@@ -39,19 +39,6 @@ class Dashboard
         $db->Close();
         return (isset($orders) && $orders->RowCount() > 0) ? $orders : null ;
     }
-
-    public static function get_stats()
-    {
-        return array(
-            "ordersTemp"            => $_SESSION['user']['issalesrep'] == 'Y' ? Order::get_orders() : false,
-            "orders"                => Order::get_orders(0, null, false),
-            "products"              => Product::get_products(),
-            "qtyOrders"             => Order::qty_orders(),
-            "qtyOrdersToApprove"    => Order::qty_orders("'AP', 'IP'"),
-            "qtyClients"            => BPartner::qty_clients(),
-            "qtyProducts"           => Product::qty_products()   
-        );
-    }
 }
 
 ?>

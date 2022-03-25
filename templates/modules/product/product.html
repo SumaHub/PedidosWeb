@@ -14,23 +14,18 @@
                 <div class="col-md-3">
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">{{ product.codigo }}</h3>
+                            <h3 class="card-title">{{ product.getValue }}</h3>
                         </div>
                         <div class="card-body">
                             <strong><i class="fas fa-book mr-1"></i> Modelo</strong>
-                            <p class="text-muted">{{ product.modelo }}</p>
+                            <p class="text-muted">{{ product.getSmModeloProducto.getName }}</p>
                             <hr>
                             <strong><i class="fas fa-file-alt mr-1"></i> Clasificaci&oacute;n</strong>
-                            <p class="text-muted">{{ product.categoria }}, {{ product.subcategoria }}</p>
+                            <p class="text-muted">{{ product.getMProductCategory.getName }}</p>
                             <hr>
                             <strong><i class="fas fa-pencil-alt mr-1"></i> Creado</strong>
                             <p class="text-muted">
-                                <span class="tag tag-success">{{ product.creadopor }}: {{ product.creado }}</span>
-                            </p>
-                            <hr>
-                            <strong><i class="fas fa-pencil-alt mr-1"></i> Modificado</strong>
-                            <p class="text-muted">
-                                <span class="tag tag-success">{{ product.actualizadopor }}: {{ product.actualizado }}</span>
+                                <span class="tag tag-success">{{ product.getAdUser.getName }}: {{ product.getCreated|date('Y-m-d') }}</span>
                             </p>
                         </div>
                     </div>
@@ -50,58 +45,105 @@
                                         <div class="form-group row">
                                             <label for="marca" class="col-sm-2 col-form-label">Marca</label>
                                             <div class="col-sm-10">
-                                                <input disabled type="text" class="form-control" id="marca" value="{{ product.marca }}">
+                                                <input disabled type="text" class="form-control" id="marca" value="{{ product.getSmMarca.getName }}">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="nombre" class="col-sm-2 col-form-label">Nombre</label>
                                             <div class="col-sm-10">
-                                                <input disabled type="text" class="form-control" id="nombre" value="{{ product.nombre }}">
+                                                <input disabled type="text" class="form-control" id="nombre" value="{{ product.getName }}">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="codigo" class="col-sm-2 col-form-label">C&oacute;digo</label>
                                             <div class="col-sm-10">
-                                                <input disabled type="text" class="form-control" id="codigo" value="{{ product.codigo }}">
+                                                <input disabled type="text" class="form-control" id="codigo" value="{{ product.getValue }}">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="sku" class="col-sm-2 col-form-label">SKU</label>
                                             <div class="col-sm-10">
-                                                <input disabled type="text" class="form-control" id="sku" value="{{ product.sku }}">
+                                                <input disabled type="text" class="form-control" id="sku" value="{{ product.getSku }}">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label for="categoria" class="col-sm-2 col-form-label">Categor&iacute;a</label>
                                             <div class="col-sm-10">
-                                                <input disabled type="text" class="form-control" id="categoria" value="{{ product.categoria }}">
+                                                <input disabled type="text" class="form-control" id="categoria" value="{{ product.getMProductCategory.getName }}">
                                             </div>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="tab-pane" id="imagenes">
                                     <div class="row">
-                                        {% for image in images %}
-                                        <div id="{{ image.id }}" class="col-md-4 col-lg-3 col-xl-3">
+                                        {% for image in product.getMProductdownload %}
+                                        <div id="{{ image.getId }}" class="col-md-4 col-lg-3 col-xl-3">
                                             <div class="card mb-2">
                                                 <div class="card-body card-img p-0">
-                                                    <img src="{{ image.downloadurl }}" class="w-100">
+                                                    <img src="{{ image.getDownloadurl }}" class="w-100">
                                                     <div class="btn-group">
-                                                        <div class="btn btn-copy btn-info" data-clipboard-text="{{ image.downloadurl }}">
+                                                        <div class="btn btn-copy btn-info" data-clipboard-text="{{ image.getDownloadurl }}">
                                                             <i class="fas fa-copy"></i>
                                                         </div>
-                                                        <div class="btn delete btn-danger" data-product="{{ image.codigo }}" data-image="{{ image.name }}">
+                                                        <div class="btn delete btn-danger" data-product="{{ product.getValue }}" data-image="{{ image.getName }}">
                                                             <i class="fas fa-eraser"></i>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="card-footer">
-                                                    <p>{{ image.name }}</p>
-                                                    <p>{{ image.created }}</p>
+                                                    <p>{{ image.getName }}</p>
+                                                    <p>{{ image.getCreated|date('Y-m-d H:m:s') }}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         {% endfor %}
+                                    </div>
+                                    <div class="row mt-3" id="producto-imagenes">
+                                        <div class="col-lg-12">
+                                            <div class="btn-group w-100">
+                                                <span class="btn btn-success col-4 fileinput-button">
+                                                    <i class="fas fa-plus"></i>
+                                                    <span>Agregar</span>
+                                                </span>
+                                                <button type="submit" class="btn btn-primary col-4 start">
+                                                    <i class="fas fa-upload"></i>
+                                                    <span>Subir</span>
+                                                </button>
+                                                <button type="reset" class="btn btn-warning col-4 cancel">
+                                                    <i class="fas fa-times-circle"></i>
+                                                    <span>Cancelar</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table table-striped files" id="previews">
+                                        <div id="template" class="row mt-2">
+                                            <div class="col-4">
+                                                <span class="preview"><img src="data:," alt="data-dz-name" data-dz-thumbnail /></span>
+                                            </div>
+                                            <div class="col-4 d-flex flex-column align-items-center">
+                                                <p class="mb-0">
+                                                    <span data-dz-name></span>
+                                                    (<span data-dz-size></span>)
+                                                </p>
+                                                <strong class="error text-danger" data-dz-errormessage></strong>
+                                                <div class="progress progress-striped active w-100" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                                    <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 d-flex align-items-center">
+                                                <div class="btn-group">
+                                                    <button class="btn btn-success start">
+                                                        <i class="fas fa-upload"></i>
+                                                        <span>Subir</span>
+                                                    </button>
+                                                    <button data-dz-remove class="btn btn-danger delete">
+                                                        <i class="fas fa-trash"></i>
+                                                        <span>Borrar</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -154,8 +196,63 @@
         })
     </script>
 
+    <!-- dropzonejs -->
+    <script src="/assets/vendor/dropzone/min/dropzone.min.js"></script>
+
+    <script>
+        // DropzoneJS Demo Code Start
+        Dropzone.autoDiscover = false
+
+        // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+        var previewNode = document.querySelector("#template")
+        previewNode.id = ""
+        var previewTemplate = previewNode.parentNode.innerHTML
+        previewNode.parentNode.removeChild(previewNode)
+
+        var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+            url: "/producto/imagen/{{ product.value }}", // Set the url
+            thumbnailWidth: 80,
+            thumbnailHeight: 80,
+            parallelUploads: 5,
+            maxFiles: 5,
+            maxFilesize: 1,
+            previewTemplate: previewTemplate,
+            acceptedFiles: 'image/png, image/jpeg, image/webp',
+            autoQueue: false, // Make sure the files aren't queued until manually added
+            previewsContainer: "#previews", // Define the container to display the previews
+            clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+        })
+
+        myDropzone.on("addedfile", function(file) {
+            // Hookup the start button
+            file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file) }
+        })
+
+        myDropzone.on("sending", function(file) {
+            // And disable the start button
+            file.previewElement.querySelector(".start").setAttribute("disabled", "disabled")
+        })
+
+        // Hide the total progress bar when nothing's uploading anymore
+        myDropzone.on("queuecomplete", function(progress) {
+            window.location.href = "/producto/{{ product.value }}"
+        })
+
+        // Setup the buttons for all transfers
+        // The "add files" button doesn't need to be setup because the config
+        // `clickable` has already been specified.
+        document.querySelector("#producto-imagenes .start").onclick = function() {
+            myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED))
+        }
+        document.querySelector("#producto-imagenes .cancel").onclick = function() {
+            myDropzone.removeAllFiles(true)
+        }
+        // DropzoneJS Demo Code End
+    </script>
+
     <!-- ClipboardJS -->
     <script src="/node_modules/clipboard/dist/clipboard.min.js"></script>
+    
     <script>
         new ClipboardJS('.btn-copy');
     </script>

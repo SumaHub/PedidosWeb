@@ -24,37 +24,34 @@
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th></th>
                                         <th>Documento</th>
                                         <th>Cliente</th>
-                                        <th>Termino de Pago</th>
                                         <th>Fecha Cont.</th>
-                                        <th>Fecha Venc.</th>
                                         <th>Monto</th>
                                         <th>Estatus</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 {% for invoice in invoices %}
+                                    {% set status = invoice.getDocstatus|lower %}
                                     <tr>
                                         <td class="align-middle"></td>
-                                        <td class="align-middle">{{ loop.index }}</td>
-                                        <td class="align-middle">{{ invoice.doctype }}: {{ invoice.documentno }}</td>
-                                        <td class="align-middle">{{ invoice.bpartner }}</td>
-                                        <td class="align-middle">{{ invoice.paymentterm }}</td>
-                                        <td class="align-middle">{{ invoice.dateacct }}</td>
-                                        <td class="align-middle">{{ invoice.duedate }}</td>
-                                        <td class="align-middle text-right">{{ number_format(invoice.grandtotal, 2) }}</td>
                                         <td class="align-middle">
-                                            {% if invoice.docstatus|lower == 'completo' %} 
-                                                {% set flag = 'success' %}
-                                            {% elseif invoice.docstatus|lower == 'cerrado' %}
-                                                {% set flag = 'info' %}
+                                            <a href="/factura/{{ invoice.getDocumentno }}/{{ invoice.getId|base64 }}">{{ invoice.getDocumentno }}</a>
+                                        </td>
+                                        <td class="align-middle">{{ invoice.getCBpartner.getName }}</td>
+                                        <td class="align-middle">{{ invoice.getDateacct|date('Y-m-d') }}</td>
+                                        <td class="align-middle text-right">{{ number_format(invoice.getGrandtotal, 2) }}</td>
+                                        <td class="align-middle">
+                                            {% if status == 'co' %} 
+                                                {% set estatus, flag = 'Completo', 'success' %}
+                                            {% elseif status == 'cl' %}
+                                                {% set estatus, flag = 'Cerrado', 'info' %}
                                             {% else %}
                                                 {% set flag = 'warning' %}
                                             {% endif %}
                                             <span class="badge badge-{{ flag }}">
-                                            {{ invoice.docstatus }}
+                                            {{ invoice.getDocstatus }}
                                             </span>
                                         </td>
                                     </tr>
@@ -95,7 +92,7 @@
     <script>
         $("#invoices-table").dataTable({ 
             columnDefs: [{ orderable: false, targets: 0 }], 
-            order: [[1, "asc" ]], 
+            order: [[3, "desc" ]], 
             responsive: true, 
             lengthChange: false, 
             autoWidth: false, 

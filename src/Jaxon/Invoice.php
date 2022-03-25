@@ -29,6 +29,24 @@ class Invoice extends Base
         return $invoice->get_open($AD_Org_ID, $AD_User_ID, $C_BPartner_ID, $DaysDue, $NotificationNode);
     }
 
+    /**
+     * Devuelve un arreglo con los datos
+     * de las facturas con notas de telecobranza
+     * 
+     * @param int $CreatedBy Identificador del Operador
+     * @param bool $IsSupervisor Es un supervisor?
+     * 
+     * @return ADORecordSet Facturas y Notas
+     */
+    public static function getToCollect(
+        Int $CreatedBy,
+        Bool $IsSupervisor = false
+    )
+    {
+        $invoice = new ModelInvoice;
+        return $invoice->get_to_collect($CreatedBy, $IsSupervisor);
+    }
+
     public static function setNotificationNode(
         Int $C_Invoice_ID,
         Int $NotificationNode = 0

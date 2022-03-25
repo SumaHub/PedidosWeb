@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Constant;
 use App\Controller\DBController;
+use App\Repository\COrderRepository;
 
 class Order 
 {
@@ -265,48 +266,24 @@ class Order
      * @return array Ordenes de venta
      */
     public static function get_orders(
-        Int $SalesRep_ID = 0,
         Int $AD_Org_ID = null,
-        Bool $IsTemp = true,
-        Int $limit = 0
+        Int $SalesRep_ID = null,
+        Int $limit = 0,
+        $doctrine
     )
     {
-        $db = DBController::conectar();
+        $repository = new COrderRepository($doctrine);
+        
+        $orders = $repository->findBy(
+            [ 
+                'isactive'      => 'Y', 
+                'ad_org_id'     => $AD_Org_ID ?: $_SESSION['organization']['ad_org_id']
+            ],
+            [ 'dateordered' => 'desc' ],
+            $limit
+        );    
 
-        if($db->IsConnected()){
-            list($SalesRep_ID, $AD_Org_ID, $table)  = array( 
-                $_SESSION['user']['issalesrep'] == 'Y' ? $_SESSION['user']['ad_user_id'] : $SalesRep_ID,
-                $AD_Org_ID ?: $_SESSION['organization']['ad_org_id'],
-                $IsTemp ? "SM_Order" : "C_Order"
-            );
-
-            $orders = $db->Execute(
-                "SELECT 
-                    $table.*, arl_t.Name AS DocStatus, $table.DateOrdered::date,
-                    extract(DAY FROM current_timestamp - $table.DateOrdered) as diff_d,
-                    extract(HOUR FROM current_timestamp - $table.DateOrdered) as diff_h,
-                    extract(MINUTE FROM current_timestamp - $table.DateOrdered) as diff_m,
-                    extract(SECOND FROM current_timestamp - $table.DateOrdered) as diff_s, 
-                    cb.Name AS partner 
-                FROM $table
-                JOIN C_BPartner cb ON cb.C_BPartner_ID = $table.C_BPartner_ID
-                JOIN AD_Ref_List arl ON arl.Value = $table.DocStatus AND arl.AD_Reference_ID = 131
-                JOIN AD_Ref_List_Trl arl_t ON arl_t.AD_Ref_List_ID = arl.AD_Ref_List_ID AND arl_t.AD_Language = 'es_CO'
-                WHERE 
-                    $table.IsActive = 'Y' 
-                    AND CASE 
-                        WHEN $SalesRep_ID > 0 THEN $table.SalesRep_ID = $SalesRep_ID
-                        ELSE true
-                    END
-                    AND CASE WHEN $AD_Org_ID > 0 THEN $table.AD_Org_ID = $AD_Org_ID ELSE true END
-                ORDER BY $table.DateOrdered DESC
-                LIMIT $limit") ;
-        } else {
-            $msj    = $db->ErrorMsg();
-        }
-
-        $db->Close();
-        return $msj ?? $orders;
+        return $orders;
     }
 
     /**
@@ -320,28 +297,21 @@ class Order
      * @
      */
     public static function qty_orders(
-        String $DocStatus = "'CO', 'CL'",
-        Int $SalesRep_ID = null
+        Int $AD_Org_ID = null,
+        String $DocStatus = "'CL'",
+        Int $SalesRep_ID = null,
+        $doctrine
     )
     {
-        $db = DBController::conectar();
-        $orders = null;
-
-        if($db->IsConnected()){
-            list($SalesRep_ID, $IsSalesRep, $AD_Org_ID) = array( $SalesRep_ID ?: $_SESSION['user']['ad_user_id'], $_SESSION['user']['issalesrep'], $_SESSION['organization']['ad_org_id'] ); 
-            
-            $orders = $db->GetOne(
-                "SELECT COUNT(*) 
-                FROM C_Order 
-                WHERE IsActive = 'Y' AND IsSOTrx = 'Y' 
-                AND AD_Org_ID = $AD_Org_ID
-                AND DocStatus IN ($DocStatus)
-                AND CASE WHEN '{$IsSalesRep}' = 'Y' THEN SalesRep_ID = {$SalesRep_ID} ELSE true END"
+        $repository = new COrderRepository($doctrine);
+        $orders = $repository->count(
+            [
+                'isactive' => 'Y',
+                'issotrx' => 'Y',
+                'docstatus'=> $DocStatus
+            ]
             );
-        } 
-
-        $db->Close();
-        return $orders ?? 0 ;
+        return $orders;
     }
 
     /**

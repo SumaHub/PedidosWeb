@@ -19,7 +19,8 @@
                             <div class="col-sm-6">
                                 <h1 class="m-0">{{ modulo }}</h1>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 text-right">
+                                {% block content_action %}
                                 <ol class="breadcrumb float-sm-right">
                                     <li class="breadcrumb-item"><a href="/">Inicio</a></li>
                                     {% if breadcrumb %}
@@ -29,6 +30,7 @@
                                         <li class="breadcrumb-item active">{{ modulo }}</li>
                                     {% endif %}
                                 </ol>
+                                {% endblock %}
                             </div>
                         </div>
                     </div>
@@ -42,7 +44,7 @@
                             <div class="col-md-6 col-lg-3 col-12">
                                 <div class="small-box bg-success">
                                     <div class="inner">
-                                        <h3 id="qtyOrders">{{ stats.qtyOrders }}</h3>
+                                        <h3 id="qtyOrders">{{ stats.orderQty }}</h3>
                                         <p>Pedidos Registrados</p>
                                     </div>
                                     <div class="icon">
@@ -54,7 +56,7 @@
                             <div class="col-md-6 col-lg-3 col-12">
                                 <div class="small-box bg-danger">
                                     <div class="inner">
-                                        <h3 id="qtyOrdersToApprove">{{ stats.qtyOrdersToApprove }}</h3>
+                                        <h3 id="qtyOrdersToApprove">{{ stats.orderToApproveQty }}</h3>
                                         <p>Pedidos por Aprobar</p>
                                     </div>
                                     <div class="icon">
@@ -66,7 +68,7 @@
                             <div class="col-md-6 col-lg-3 col-12">
                                 <div class="small-box bg-info">
                                     <div class="inner">
-                                        <h3 id="qtyClients">{{ stats.qtyClients }}</h3>
+                                        <h3 id="qtyClients">{{ stats.bpartnerQty }}</h3>
                                         <p>Clientes</p>
                                     </div>
                                     <div class="icon">
@@ -78,7 +80,7 @@
                             <div class="col-md-6 col-lg-3 col-12">
                                 <div class="small-box bg-purple">
                                     <div class="inner">
-                                        <h3 id="qtyProduct">{{ stats.qtyProducts }}</h3>
+                                        <h3 id="qtyProduct">{{ stats.productQty }}</h3>
                                         <p>Productos Registrados</p>
                                     </div>
                                     <div class="icon">
@@ -155,6 +157,7 @@
                                 {% endif %}
 
                                 <!-- Last Orders -->
+                                {% if stats.orders|length > 0 %}
                                 <div class="card">
                                     <div class="card-header border-0">
                                         <h3 class="card-title">
@@ -184,18 +187,19 @@
                                                 </thead>
                                                 <tbody>
                                                 {% for order in stats.orders %}
+                                                    {% set status = order.getDocstatus|upper %}
                                                     <tr>
-                                                        <td><a href="/pedido/{{ order.c_order_id }}">{{ order.documentno }}</a></td>
-                                                        <td>{{ order.client }}</td>
-                                                        {% if order.docstatus|lower == 'completo' %} 
+                                                        <td><a href="/pedido/{{ order.getDocumentno }}">{{ order.getDocumentno }}</a></td>
+                                                        <td>{{ order.getCBpartner.getName }}</td>
+                                                        {% if status == 'CO' %} 
                                                             {% set flag = 'success' %}
-                                                        {% elseif order.docstatus|lower == 'cerrado' %}
+                                                        {% elseif status == 'CL' %}
                                                             {% set flag = 'info' %}
                                                         {% else %}
                                                             {% set flag = 'warning' %}
                                                         {% endif %}
-                                                        <td><span class="badge badge-{{ flag }}">{{ order.docstatus }}</span></td>
-                                                        <td><div class="sparkbar" data-color="#00a65a" data-height="20">{{ order.dateordered }}</div></td>
+                                                        <td><span class="badge badge-{{ flag }}">{{ status }}</span></td>
+                                                        <td><div class="sparkbar" data-color="#00a65a" data-height="20">{{ order.getDateordered|date('Y-m-d H:i') }}</div></td>
                                                     </tr>
                                                 {% endfor %}
                                                 </tbody>
@@ -206,6 +210,7 @@
                                         <a class="btn btn-primary float-right" href="/pedidos"><i class="fas fa-plus"></i> Ver Todos los Pedidos</a>
                                     </div>
                                 </div>
+                                {% endif %}
                             </div>
                             <div class="col-lg-5 connectedSortable">
                                 <!-- Last Products -->
@@ -234,10 +239,10 @@
                                                 </div>
                                                 <div class="product-info">
                                                     <a href="javascript:void(0)" class="product-title text-capitalize">
-                                                        {{ product.category|lower }}
+                                                        {{ product.getMProductCategory.getName }}
                                                         <span class="badge badge-{% if product.cantidad > 10 %}info{% else %}warning{% endif %} float-right">${{ product.pricelist }}</span>
                                                     </a>
-                                                    <span class="product-description">{{ product.product }}</span>
+                                                    <span class="product-description">{{ product.getName }}</span>
                                                 </div>
                                             </li>
                                         {% endfor %}
@@ -267,15 +272,20 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <ul class="products-list product-list-in-card pl-2 pr-2">
+                                            {% for product in stats.productsFeatured %}
                                             <li class="item">
                                                 <div class="product-img">
                                                     <img src="/assets/img/default-150x150.png" alt="Product Image" class="img-size-50">
                                                 </div>
                                                 <div class="product-info">
-                                                    <a href="javascript:void(0)" class="product-title">Samsung TV <span class="badge badge-danger float-right">$1800</span></a>
-                                                    <span class="product-description">Samsung 32" 1080p 60Hz LED Smart HDTV.</span>
+                                                    <a href="javascript:void(0)" class="product-title text-capitalize">
+                                                        {{ product.category }}
+                                                        <span class="badge badge-{% if product.cantidad > 10 %}info{% else %}warning{% endif %} float-right">{{ product.qty }}</span>
+                                                    </a>
+                                                    <span class="product-description">{{ product.name }}</span>
                                                 </div>
                                             </li>
+                                            {% endfor %}
                                         </ul>
                                     </div>
                                     <div class="card-footer text-center">

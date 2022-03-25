@@ -2,41 +2,37 @@
 
 namespace App\Controller;
 
-@session_start();
-
-use App\Jaxon\Product;
 use App\Model\Product as ModelProduct;
-use App\Util;
+use App\Repository\AdOrginfoRepository;
+use App\Repository\MProductRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
+use Symfony\Component\Routing\Annotation\Route;
 
-class ProductController extends AbstractController
+class ProductController extends BaseController
 {
-    public $loader;
-
     public $targetDir;
 
-    public $twig;
-    
     public function __construct()
     {
-        $this->targetDir = "/assets/img/product";
+        parent::__construct();
 
-        $this->loader   = new FilesystemLoader('../templates');
-        $this->twig     = new Environment($this->loader, [
-            'cache'         => '../templates/cache',
-            'autoescape'    => false,
-            'debug'         => true
-        ]);
+        $this->targetDir = "/assets/img/product";
     }
 
-    public function add_image(String $codigo)
+    /**
+     * Ruta para ver todos los productos
+     * @Route("/producto/imagen/{codigo}", name="productos")
+     * 
+     * @param string $codigo Codigo del producto
+     *
+     * @return \Symfony\Component\HttpFoundation\Response Vista
+     */
+    public function add_image(String $codigo): Response
     {
-        if ( Util::VerifySession() ) $this->logout();
+        if ( !$this->VerifySession() ) 
+            return $this->logout();
 
         $image      = new ImageController($this->targetDir);
         $product    = new ModelProduct();
@@ -58,31 +54,84 @@ class ProductController extends AbstractController
         return $response;
     }
 
-    public function list(Jaxon $jaxon)
+    /**
+     * Ruta para ver todos los productos
+     * @Route("/productos", name="productos")
+     * 
+     * @param \Jaxon\AjaxBundle\Jaxon $jaxon
+     * @param \Doctrine\Persistence\ManagerRegistry $manager
+     *
+     * @return \Symfony\Component\HttpFoundation\Response Vista
+     */
+    public function list(Jaxon $jaxon, ManagerRegistry $manager): Response
     {
+        if( !$this->VerifySession() ) 
+            return $this->logout();
+
         $response = new Response();
+
+        /** Session Variables */
+        $user = $this->session->get('user', null);
+        $organization = $this->session->get('organization', null);
+
+        /** Document Variable */
+        $ROrg = new AdOrginfoRepository($manager);
+        $organizationInfo = $ROrg->findBy(
+            ['ad_org_id' => $organization->getAdOrgId()],
+            null,
+            1
+        );
+
+        $RProduct = new MProductRepository($manager);
         $response->setContent(
             $this->twig->render('modules/product/list.html', [
                 'title'         => 'Pedidos Web | Productos',
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Productos',
-                'user'          => ( isset($_SESSION['user']) ) ? $_SESSION['user'] : null,
-                'products'      => Product::showProducts(),
+                'user'          => $user,
+                'organization'  => $organization,
+                "products"      => $RProduct->findBy(
+                    [
+                        'sm_marca_id' => $organizationInfo[0]->getSmMarcaId(),
+                        'issold' => 'Y',
+                        'isactive' => 'Y'
+                    ],
+                    null
+                ),
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script(),
             ])
         );
         
-        return ( Util::VerifySession() ) ? $this->logout() : $response ;
+        return  $response;
     }
 
-    public function logout(): RedirectResponse { return $this->redirectToRoute('ingresar'); }
-
-    public function show(Jaxon $jaxon, String $codigo)
+    /**
+     * Ruta para ver el detalle de un producto
+     * @Route("/producto/{codigo}", name="producto_view")
+     * 
+     * @param \Jaxon\AjaxBundle\Jaxon $jaxon
+     * @param \Doctrine\Persistence\ManagerRegistry $manager
+     * @param string $codigo Codigo del producto
+     *
+     * @return \Symfony\Component\HttpFoundation\Response Vista
+     */
+    public function view(Jaxon $jaxon, ManagerRegistry $manager, String $codigo): Response
     {
+        if( !$this->VerifySession() ) 
+            return $this->logout();
+
         $response = new Response();
+
+        /** Session Variables */
+        $user = $this->session->get('user', null);
+        $organization = $this->session->get('organization', null);
+
+        /** Entity Repository */
+        $RProduct = new MProductRepository($manager);
+        
         $response->setContent(
             $this->twig->render('modules/product/product.html', [
                 'title'         => 'Pedidos Web | Producto | ' . strtoupper($codigo),
@@ -90,16 +139,20 @@ class ProductController extends AbstractController
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Productos',
                 'breadcrumb'    => $codigo,
-                'user'          => ( isset($_SESSION['user']) ) ? $_SESSION['user'] : null,
-                'product'       => Product::getProduct($codigo),
-                'images'        => Product::imagesPerProduct($codigo),
+                'user'          => $user,
+                'organization'  => $organization,
+                'product'       => $RProduct->findBy(
+                    ['value' => $codigo],
+                    null,
+                    1
+                )[0],
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script(),
             ])
         );
 
-        return ( Util::VerifySession() ) ? $this->logout() : $response ;
+        return $response;
     }
 }
 

@@ -3,6 +3,8 @@
 namespace App\Model;
 
 use App\Controller\DBController;
+use App\Repository\AdOrginfoRepository;
+use App\Repository\MProductRepository;
 
 class Product
 {
@@ -40,7 +42,7 @@ class Product
                 "UpdatedBy"             => $_SESSION['user']['ad_user_id'],
                 "M_Product_ID"          => $db->GetOne("SELECT M_Product_ID FROM M_Product WHERE Value = '{$codigo}'"),
                 "Name"                  => $name,
-                "DownloadURL"           => 'http://catalogo.sumagroups.com' . $patch . '/' . $codigo . '/' . $name,
+                "DownloadURL"           => 'http://pedido.sumagroups.com' . $patch . '/' . $codigo . '/' . $name,
                 "M_ProductDownload_UU"  => $db->GetOne("SELECT uuid_generate_v4()")
             );
 
@@ -189,7 +191,7 @@ class Product
                     -- Acceso a la Org
                     JOIN WS_User_OrgAccess_v wuo ON wuo.AD_Org_ID = ms.AD_Org_ID AND wuo.AD_User_ID = {$SalesRep_ID}
                 WHERE 
-                    mp.IsSold = 'Y' AND mp.IsActive = 'Y' AND mlt.IsAvailableForShipping = 'Y' AND sm.SM_Marca_ID NOT IN (1000005, 1000007, 1000009, 1000011)
+                    mp.IsActive = 'Y' AND mp.IsSold = 'Y' AND mlt.IsAvailableForShipping = 'Y' AND sm.SM_Marca_ID NOT IN (1000005, 1000007, 1000009, 1000011)
                     AND mpl.IsActive = 'Y' AND mplv.IsActive = 'Y' AND mpp.IsActive = 'Y'
                     AND CASE WHEN '{$code}' != '' 
                         THEN LOWER(mp.Name) LIKE LOWER('%{$code}%') OR LOWER(mp.Value) LIKE LOWER('%{$code}%') OR LOWER(mp.SKU) LIKE LOWER('%{$code}%')
@@ -318,39 +320,32 @@ class Product
 
     /**
      * Obtiene la cantidad de productos registrados 
-     * por organizacion
+     * por marca
      * 
-     * @param int $AD_Org_ID Identificador de la organizacion
+     * @param int $SM_Marca_ID Identificador de la marca
      * 
      * @return int Cantidad de productos
      */
     public static function qty_products(
-        Int $AD_Org_ID = null
+        Int $SM_Marca_ID = null,
+        $doctrine
     )
     {
-        $db = DBController::conectar();
-        $products = null;
+        $productRepository = new MProductRepository($doctrine);
+        $orginfoRepository = new AdOrginfoRepository($doctrine);
 
-        if($db->IsConnected()){
-            $AD_Org_ID = $AD_Org_ID ?: $_SESSION['organization']['ad_org_id'];
-
-            $products = $db->GetOne(
-                "SELECT 
-                    COUNT(mp.*) 
-                FROM 
-                    M_Product mp
-                    JOIN M_Storage ms ON ms.M_Product_ID = mp.M_Product_ID
-                    JOIN M_Locator ml ON ml.M_Locator_ID = ms.M_Locator_ID
-                    JOIN M_LocatorType mlt ON mlt.M_LocatorType_ID = ml.M_LocatorType_ID
-                WHERE 
-                    mp.IsActive = 'Y' AND mp.IsSold = 'Y' AND mp.SM_Marca_ID NOT IN (1000005, 1000007, 1000009, 1000011)
-                    AND CASE WHEN {$AD_Org_ID} > 0 THEN ms.AD_Org_ID = {$AD_Org_ID} ELSE true END
-                    AND mlt.IsAvailableForShipping = 'Y'"
-            );
-        } 
-
-        $db->Close();
-        return $products ?? 0;
+        //$orginfo = $orginfoRepository->findBy( ['ad_org_id' => $_SESSION['organization']['ad_org_id'] ], null, 1);
+        $products = $productRepository->count( 
+            [
+                'sm_marca_id' => $SM_Marca_ID ?: $orginfoRepository->findBy( 
+                    ['ad_org_id' => $_SESSION['organization']['ad_org_id']], 
+                    null, 
+                    1
+                )[0]->getSmMarcaId()
+            ] 
+        );
+        
+        return $products;
     }
 }
 

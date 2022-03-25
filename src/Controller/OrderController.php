@@ -2,70 +2,58 @@
 
 namespace App\Controller;
 
-@session_start();
-
-use App\Jaxon\Order;
-use App\Jaxon\Organization;
-use App\Util;
+use App\Repository\CDoctypeRepository;
+use App\Repository\COrderRepository;
+use App\Repository\CPaymenttermRepository;
+use App\Repository\MPricelistRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 Class OrderController extends BaseController
 {
-    /**
-     * Ruta para editar un pedido temporal
-     * 
-     * @param object $jaxon Jaxon\AjaxBundle\Jaxon
-     * @param string $order_id Identificador de la orden
-     * 
-     * @return object Symfony\Component\HttpFoundation\Response
-     */
-    public function edit(Jaxon $jaxon, String $order_id)
-    {
-        if(Util::VerifySession()) return $this->logout();
-
-        $response = new Response();
-        $response->setContent(
-            $this->twig->render('modules/order/edit.html', [
-                'title'         => 'Pedidos Web | Pedido |' . $order_id,
-                'version'       => 'Versi&oacute;n 2.0.0',
-                'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
-                'modulo'        => 'Pedidos',
-                'breadcrumb'    => $order_id,
-                'user'          => $_SESSION['user'],
-                'order'         => Order::getOrder($order_id),
-                'organizations' => Organization::getOrganizations($_SESSION['user']['ad_user_id']),
-                'pricelists'    => Organization::setPricelist(),
-                'terms'         => Organization::getPaymentTerms(),
-                'jaxonCss'      => $jaxon->css(),
-                'jaxonJs'       => $jaxon->js(),
-                'jaxonScript'   => $jaxon->script()
-            ])
-        );
-
-        return $response;
-    }
 
     /**
      * Ruta para ver una lista con los pedidos aprobados
+     * @Route("/pedidos", name="orders")
      * 
-     * @param object $jaxon Jaxon\AjaxBundle\Jaxon
-     * 
-     * @return object Symfony\Component\HttpFoundation\Response
+     * @param \Jaxon\AjaxBundle\Jaxon $jaxon
+     * @param \Doctrine\Persistence\ManagerRegistry $manager
+     *
+     * @return \Symfony\Component\HttpFoundation\Response Vista
      */
-    public function list(Jaxon $jaxon)
+    public function list(Jaxon $jaxon, ManagerRegistry $manager): Response
     {
-        if(Util::VerifySession()) return $this->logout();
+        if( !$this->VerifySession() ) 
+            return $this->logout();
 
         $response = new Response();
+
+        /** Session Variables */
+        $user = $this->session->get('user', null);
+        $organization = $this->session->get('organization', null);
+
+        /** Entity Repository */
+        $ROrder = new COrderRepository($manager);
+
         $response->setContent(
             $this->twig->render('modules/order/list.html', [
                 'title'         => 'Pedidos Web | Pedidos',
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Pedidos',
-                'user'          => $_SESSION['user'],
-                'orders'        => Order::getOrders(0, null, false),
+                'user'          => $user,
+                'organization'  => $organization,
+                'orders'        => $ROrder->findBy(
+                    [
+                        'ad_org_id' => $organization->getAdOrgId(),
+                        'issotrx' => 'Y',
+                        'isactive' => 'Y'
+                    ], 
+                    ['dateordered' => 'desc'], 
+                    30
+                ),
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script(),
@@ -77,17 +65,29 @@ Class OrderController extends BaseController
 
     /**
      * Ruta para crear un nuevo pedido
+     * @Route("/pedido", name="order")
      * 
-     * @param object $jaxon Jaxon\AjaxBundle\Jaxon
+     * @param Jaxon\AjaxBundle\Jaxon $jaxon
+     * @param \Doctrine\Persistence\ManagerRegistry $manager
      * 
-     * @return object Symfony\Component\HttpFoundation\Response
+     * @return Symfony\Component\HttpFoundation\Response Vista
      */
-    public function new(Jaxon $jaxon)
+    public function new(Jaxon $jaxon, ManagerRegistry $manager): Response
     {
-        if(Util::VerifySession()) return $this->logout();
+        if( !$this->VerifySession() ) 
+            return $this->logout();
 
-        unset($_SESSION['order']);
         $response = new Response();
+
+        /** Session Variables */
+        $user = $this->session->get('user', null);
+        $organization = $this->session->get('organization', null);
+
+        /** Entity Repository */
+        $RDoctype = new CDoctypeRepository($manager);
+        $RPaymentterm = new CPaymenttermRepository($manager);
+        $RPricelist = new MPricelistRepository($manager);
+
         $response->setContent(
             $this->twig->render('modules/order/new.html', [
                 'title'         => 'Pedidos Web | Nuevo Pedido',
@@ -95,10 +95,25 @@ Class OrderController extends BaseController
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Pedido',
                 'breadcrumb'    => 'Nuevo',
-                'user'          => $_SESSION['user'],
-                'organizations' => Organization::getOrganizations($_SESSION['user']['ad_user_id']),
-                'pricelists'    => Organization::setPricelist(),
-                'terms'         => Organization::getPaymentTerms(),
+                'user'          => $user,
+                'organization'  => $organization,
+                'doctype'       => $RDoctype->findBy([
+                    'ad_client_id'  => [ $organization->getAdClientId() ],
+                    'c_doctype_id'  => [1000068],
+                    'docbasetype'   => 'SOO',
+                    'issotrx'       => 'Y',
+                    'isactive'      => 'Y'
+                ]),
+                'pricelist'     => $RPricelist->findBy([
+                    'ad_org_id'     => $organization->getId(),
+                    'issopricelist' => 'Y',
+                    'isactive'      => 'Y'
+                ]),
+                'paymentterm'   => $RPaymentterm->findBy([
+                    'ad_client_id'  => $organization->getAdClientId(),
+                    'paymenttermusage'=> ['B', 'S'],
+                    'isactive'      => 'Y'
+                ]),
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script()
@@ -109,30 +124,43 @@ Class OrderController extends BaseController
     }
 
     /**
-     * Ruta para ver un pedido aprobado
+     * Ruta para ver un pedido
+     * @Route("/pedido/{documentno}", name="pedido_view")
      * 
-     * @param object $jaxon Jaxon\AjaxBundle\Jaxon
-     * @param string $order_id Identificador de la orden
+     * @param \Jaxon\AjaxBundle\Jaxon $jaxon 
+     * @param \Doctrine\Persistence\ManagerRegistry $manager
+     * @param string $documentno Identificador de la orden
      * 
-     * @return object Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response Vista
      */
-    public function view(Jaxon $jaxon, String $order_id)
+    public function view(Jaxon $jaxon, ManagerRegistry $manager, String $documentno): Response
     {
-        if(Util::VerifySession()) return $this->logout();
+        if( !$this->VerifySession() ) 
+            return $this->logout();
 
         $response = new Response();
+
+        $user = $this->session->get('user', null);
+        $organization = $this->session->get('organization', null);
+
+        $ROrder = new COrderRepository($manager);
+        $order = $ROrder->findBy( 
+            ['documentno' => $documentno],
+            null,
+            1 
+        );
+        $this->session->set('order', $order[0]);
+
         $response->setContent(
             $this->twig->render('modules/order/view.html', [
-                'title'         => 'Pedidos Web | Pedido |' . $order_id,
+                'title'         => 'Pedidos Web | Pedido | ' . $documentno,
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Pedidos',
-                'breadcrumb'    => $order_id,
-                'user'          => $_SESSION['user'],
-                'order'         => Order::getOrder($order_id, false),
-                'organizations' => Organization::getOrganizations($_SESSION['user']['ad_user_id']),
-                'pricelists'    => Organization::setPricelist(),
-                'terms'         => Organization::getPaymentTerms(),
+                'breadcrumb'    => $documentno,
+                'user'          => $user,
+                'organization'  => $organization,
+                'order'         => $order[0],
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script()

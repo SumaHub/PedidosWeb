@@ -6,6 +6,8 @@ use App\Constant;
 use App\Jaxon\Invoice;
 use App\Jaxon\User;
 use Knp\Snappy\Pdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,6 +38,8 @@ class InvoicesOpen extends Command
 
     protected $pdf;
 
+    protected $spreedsheet;
+
     protected $twig;
 
     protected $user;
@@ -62,6 +66,10 @@ class InvoicesOpen extends Command
         ]);
         $this->pdf->setTemporaryFolder(dirname(__DIR__) . '/../public/tmp/');
 
+        // XLSX options
+        $this->spreedsheet = new Spreadsheet();
+
+        // TWIG options
         $this->twig     = new Environment($this->loader, [
             'cache'         => 'templates/cache',
             'autoescape'    => false,
@@ -119,20 +127,28 @@ class InvoicesOpen extends Command
                                 // 3) Obtener PDF
                                 $document = $this->pdf->getOutputFromHtml($html);
 
-                                // 4) Preparar Correo
+                                // 4) Obtener XLSX
+                                $xlsx = $this->export($invoices);
+                                
+                                // 5) Preparar Correo
                                 $email = (new Email())
                                     ->sender('no-reply@gplus.com.ve')
                                     ->addFrom('no-reply@gplus.com.ve')
                                     ->addReplyTo('no-reply@gplus.com.ve')
                                     ->to($user['email'])
-                                    ->subject('Analisis de Vencimiento: Aviso Nro ' . $node)
+                                    ->subject('Facturas Vencidas: Aviso Nro ' . $node)
                                     ->attach($document, sprintf('FacturasVencidas%s.pdf', date('YmdHis')))
+                                    ->attach(fopen($xlsx, 'r'), $xlsx)
                                     ->html('<h3>Reporte de Facturas Vencidas</h3>');
 
                                 $transport = new GmailSmtpTransport('notificacion@gplus.com.ve', 'W0Phqh7$');
                                 
-                                // 5) Enviar y listar
+                                // 5) Enviar
                                 if ( $transport->send($email) ) {
+                                    // 6.1) Borrar XLSX temporal
+                                    unlink($xlsx);
+
+                                    // 6.2) Listar Facturas
                                     foreach ($invoices as $invoice) {
                                         $invoiceToUpdate[$invoice['c_invoice_id']] = $invoice;
                                     }
@@ -176,11 +192,63 @@ class InvoicesOpen extends Command
         
         $io->progressFinish();
 
-        if(count($invoiceToUpdate) > 0)
+        if(count($invoiceToUpdate) > 0) {
+            $io->info('Total: ('. count($invoiceToUpdate) .') Facturas Vencidas');
             $io->success('Reporte de facturas vencidas enviado!');
-        else
+        } else {
             $io->success('No hay facturas por notificar');
+        }
 
         return 1;
+    }
+
+    public function export($invoices)
+    {
+        // 1) Preparar XLSX
+        $sheet = $this->spreedsheet->getActiveSheet();
+
+        // 1.1) Columnas 
+        $sheet->setTitle('Facturas Vencidas');
+        $sheet->getCell('A1')->setValue('Tercero');
+        $sheet->getCell('B1')->setValue('Organizacion');
+        $sheet->getCell('C1')->setValue('Nro Documento');
+        $sheet->getCell('D1')->setValue('Vendedor');
+        $sheet->getCell('E1')->setValue('Fecha Contable');
+        $sheet->getCell('F1')->setValue('Fecha Vencimiento');
+        $sheet->getCell('G1')->setValue('Dias Vencido');
+        $sheet->getCell('H1')->setValue('Término de Pago');
+        $sheet->getCell('I1')->setValue('Monto');
+        $sheet->getCell('J1')->setValue('Saldo Abierto');
+
+        // 1.2) Filas
+        $sheet->fromArray($this->processData($invoices), null, 'A2', true);
+        
+        // 1.3) Documento
+        $xlsx = new Xlsx($this->spreedsheet);
+        $fileName = sprintf('FacturasVencidas%s.xlsx', date('YmdHis'));
+        $xlsx->save($fileName);
+
+        return $fileName;
+    }
+
+    private function processData($data): array
+    {
+        $invoces = [];
+        foreach ($data as $invoice) {
+            $invoces[] = [
+                'Tercero'               => $invoice['bpartner'],
+                'Organización'          => $invoice['organization'],
+                'Nro del Documento'     => $invoice['documentno'],
+                'Vendedor'              => $invoice['salesrep'],
+                'Fecha Contable'        => $invoice['dateacct'],
+                'Fecha Vencimiento'     => $invoice['duedate'],
+                'Dias Vencido'          => $invoice['daysdue'],
+                'Término de Pago'       => $invoice['paymentterm'],
+                'Monto'                 => $invoice['grandtotal'],
+                'Saldo Abierto'         => $invoice['dueamt']
+            ];
+        }
+
+        return $invoces;
     }
 }

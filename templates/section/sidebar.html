@@ -2,14 +2,24 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
     <!-- Brand Logo -->
-    <a href="/" class="brand-link">
-      <img src="/assets/img/AdminLTELogo.png" alt="Cat&aacute;logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">Pedidos Web</span>
-    </a>
+    <div class="top-sidebar brand-link d-flex align-content-center">
+        <div class="d-flex justify-content-center align-items-center">
+            <img src="/assets/img/AdminLTELogo.png" alt="Cat&aacute;logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        </div>
+        <div class="brand-info d-flex flex-column">
+            <a href="/">
+                <span class="brand-text font-weight-light text-white">Pedidos Web</span>
+            </a>
+            <p class="brand-text text-xs mb-0">
+                <span>{{ organization.getName }}</span>
+                <!--<a href="/organizacion"><i class="ml-3 fas fa-exchange-alt"></i></a>-->
+            </p>
+        </div>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
-        {% set fullname = user.description|split(' ') %}
+        {% set fullname = user.getDescription|split(' ') %}
         <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
             <div class="image">
                 <img src="https://ui-avatars.com/api/?name={{ fullname[0] }}+{{ fullname[2] }}" class="img-circle elevation-2" alt="{{ user.name }}">
@@ -17,7 +27,7 @@
             <div class="info">
                 <a href="#" class="d-block">
                     <p class="mb-0 text-capitalize">{{ fullname[0] }} {{ fullname[2] }}</p>
-                    <small>{{ user.email }}</small>
+                    <small>{{ user.getEmail }}</small>
                 </a>
             </div>
         </div>
@@ -44,29 +54,31 @@
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-file-invoice"></i>
-                        <p>Facturas <i class="right fas fa-angle-left"></i></p>
+                        <p>Reportes <i class="right fas fa-angle-left"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item pl-2"><a href="/antiguedad" class="nav-link"><i class="fas fa-file-invoice-dollar nav-icon"></i><p>Analisis de Vencimiento</p></a></li>
+                        <li class="nav-item pl-2"><a href="/analisis-de-vencimiento" class="nav-link"><i class="fas fa-file-invoice-dollar nav-icon"></i><p>Analisis de Vencimiento</p></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Tercero <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item pl-2"><a href="/terceros" class="nav-link"><i class="fas fa-user-tie nav-icon"></i><p>Clientes</p></a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-th"></i>
-                        <p>Pedidos <i class="right fas fa-angle-left"></i></p>
+                        <p>Ventas <i class="right fas fa-angle-left"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item pl-2"><a href="/pedido" class="nav-link"><i class="fas fa-plus nav-icon"></i><p>Nuevo Pedido</p></a></li>
-                        <li class="nav-item pl-2"><a href="/pedidos" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Consultar Pedidos</p></a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-boxes"></i>
-                        <p>Productos <i class="right fas fa-angle-left"></i></p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item pl-2"><a href="/productos" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Ver Productos</p></a></li>
+                        <li class="nav-item pl-2"><a href="/pedidos" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Pedidos</p></a></li>
+                        <li class="nav-item pl-2"><a href="/facturas" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Facturas</p></a></li>
+                        <li class="nav-item pl-2"><a href="/productos" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Articulos</p></a></li>
                     </ul>
                 </li>
                 <li class="nav-item">

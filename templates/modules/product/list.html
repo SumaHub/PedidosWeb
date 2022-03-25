@@ -26,9 +26,9 @@
                                         <th></th>
                                         <th>C&oacute;digo</th>
                                         <th>Marca</th>
-                                        <th>Categor&iacute;a</th>
                                         <th>Nombre</th>
-                                        <th>Precio</th>
+                                        <th>SKU</th>
+                                        <th>Categor&iacute;a</th>
                                         <th>Imagenes</th>
                                         <th>Estatus</th>
                                     </tr>
@@ -38,21 +38,22 @@
                                     <tr>
                                         <td class="align-middle"></td>
                                         <td class="align-middle">
-                                            <a href="/producto/{{ product.codigo }}">{{ product.value }}</a>
+                                            <a href="/producto/{{ product.getValue }}">{{ product.getValue }}</a>
                                         </td>
-                                        <td class="align-middle">{{ product.brand }}</td>
-                                        <td class="align-middle">{{ product.category }}</td>
-                                        <td class="align-middle">{{ product.product }}</td>
-                                        <td class="align-middle text-right">${{ product.pricelist }}</td>
+                                        <td class="align-middle">{{ product.getSmMarca.getName }}</td>
+                                        <td class="align-middle">{{ product.getName }}</td>
+                                        <td class="align-middle">{{ product.getSku }}</td>
+                                        <td class="align-middle">{{ product.getMProductCategory.getName }}</td>
                                         <td class="align-middle">
                                             <div class="product-img">
-                                                <img class="img-circle" {% if product.image %}  src="{{ product.image }}" {% else %} src="https://via.placeholder.com/150" {% endif %} alt="{{ product.value }}">
-                                                <span class="badge {% if product.qtyimage > 0 %} badge-success {% else %} badge-warning {% endif %}">{{ product.qtyimage }}</span>
+                                                {% set image = product.getMProductdownload[0] %}
+                                                <img class="img-circle" {% if image.getId > 0 %}  src="{{ image.getDownloadurl }}" {% else %} src="https://via.placeholder.com/150" {% endif %} alt="{{ product.getValue }}">
+                                                <span class="badge {% if product.getMProductdownload|length > 0 %} badge-success {% else %} badge-warning {% endif %}">{{ product.getMProductdownload|length }}</span>
                                             </div>
                                         </td>
                                         <td class="align-middle">
                                             <span class="badge {% if product.isactive > Y %} badge-success {% else %} badge-danger {% endif %}">
-                                                {% if product.isactive > Y %} Activo {% else %} Inactivo {% endif %}
+                                                {% if product.getIsactive %} Activo {% else %} Inactivo {% endif %}
                                             </span>
                                         </td>
                                     </tr>

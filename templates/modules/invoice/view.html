@@ -15,113 +15,145 @@
         <div id="contenedor" class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <form id="pedidoDatos">
+                    <form id="invoice">
                         <div class="card card-outline card-info">
-                            <div class="card-header">
-                                <h3 class="card-title">Nuevo Pedido</h3>
-                            </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="organizacion">Organizaci&oacute;n</label>
+                                            <label for="organization">Organizaci&oacute;n</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-building"></i>
                                                     </span>
                                                 </div>
-                                                <select id="organizacion" name="organizacion" class="form-control" disabled>
-                                                    <option value="0">-- Seleccione una Opci&oacute;n --</option>
-                                                    {% for organization in organizations %}
-                                                        <option value="{{ organization.ad_org_id }}" {% if organization.isdefault == 'Y' %} selected {% endif %}>{{ organization.nombre }}</option>
-                                                    {% endfor %}
+                                                <input type="text" id="organization" name="organization" class="form-control" value="{{ invoice.getAdOrg.getName }}" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="bpartner">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="bpartner" id="bpartner" class="form-control" readonly="true">
+                                                    <option value="{{ invoice.getCBpartnerId }}" aria-checked="true">{{ invoice.getCBpartner.getName }}</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="codigo">Cliente</label>
+                                            <label for="documenttype">Tipo de Documento</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
-                                                        <i class="fas fa-user"></i>
+                                                        <i class="fas fa-file-invoice"></i>
                                                     </span>
                                                 </div>
-                                                <input id="tercero" name="tercero" type="text" class="form-control" value="{{ order.value }}" onkeyup="if(event.keyCode == 13){ $('#seleccionarCliente').click(); }" placeholder="Nombre o RIF" disabled>
+                                                <select name="documenttype" id="documenttype" class="form-control" readonly="true">
+                                                    <option value="{{ invoice.getCDoctypeId }}" checked="true">{{ invoice.getCDoctype.getName }}</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="codigo">Descripci&oacute;n</label>
+                                            <label for="documentno">Nro de Documento</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
-                                                        <i class="fas fa-user"></i>
+                                                        <i class="fas fa-search"></i>
                                                     </span>
                                                 </div>
-                                                <input id="descripcion" name="descripcion" type="text" class="form-control" value="{{ order.bpartner }}" disabled>
+                                                <input id="documentno" type="text" value="{{ invoice.getDocumentno }}" class="form-control" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="description">Descripci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <textarea name="description" id="description" class="form-control" rows="2">{{ invoice.getDescription }}</textarea>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="direccion">Direcci&oacute;n</label>
+                                            <label for="address">Direcci&oacute;n</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-map"></i>
                                                     </span>
                                                 </div>
-                                                <select name="direccion" id="direccion" type="text" class="form-control" disabled>
-                                                {% for location in order.locations %}
-                                                    <option value="{{ location.c_bpartner_location_id }}">{{ location.address1 }}</option>
-                                                {% endfor %}
-                                                </select>
+                                                <input type="text" name="address" id="address" class="form-control" value="{{ invoice.getCBpartnerLocation.getCLocation.getAddress1 }}" disabled>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="telefono">Tel&eacute;fono</label>
+                                            <label for="phone">Tel&eacute;fono</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-phone"></i>
                                                     </span>
                                                 </div>
-                                                <input id="telefono" type="text" class="form-control" value="{{ order.phone }}" disabled>
+                                                <input id="phone" type="text" class="form-control" value="{{ invoice.getCBpartnerLocation.getPhone }}" disabled>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="moneda">Moneda</label>
+                                            <label for="currency">Moneda</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-dollar-sign"></i>
                                                     </span>
                                                 </div>
-                                                <select name="moneda" id="moneda" class="form-control" disabled>
-                                                    <option value="100">USD</option>
+                                                <select name="currency" id="currency" class="form-control" disabled>
+                                                    <option value="{{ invoice.getCCurrencyId }}">{{ invoice.getCCurrency.getIsoCode }}</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
-                                            <label for="precio">Lista de Precio</label>
+                                            <label for="pricelist">Lista de Precio</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-clipboard-list"></i>
                                                     </span>
                                                 </div>
-                                                <select name="precio" id="precio" class="form-control" disabled>
-                                                    {{ pricelists }}
+                                                <input type="text" name="pricelist" id="pricelist" class="form-control" value="{{ invoice.getMPricelist.getName }}" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="paymentrule">Regla de Pago</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-hand-holding-usd"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="paymentrule" id="paymentrule" class="form-control" disabled>
+                                                    <option value="{{ invoice.getPaymentrule }}" checked="true">
+                                                        {% if  invoice.getPaymentrule == 'P' %}
+                                                        Con Termino de Pago
+                                                        {% elseif invoice.getPaymentrule == 'M' %}
+                                                        Multiples Medios de Pago
+                                                        {% endif %}
+                                                    </option>    
                                                 </select>
                                             </div>
                                         </div>
@@ -135,12 +167,7 @@
                                                         <i class="fas fa-hand-holding-usd"></i>
                                                     </span>
                                                 </div>
-                                                <select name="termino" id="termino" class="form-control" disabled>
-                                                    <option value="0">-- Seleccione una Opci&oacute;n --</option>
-                                                    {% for term in terms %}
-                                                        <option value="{{ term.c_paymentterm_id }}"  {% if term.isdefault == 'Y' %} selected {% endif %}>{{ term.nombre }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                                <input type="text" name="paymentterm" id="paymentterm" class="form-control" value="{{ invoice.getCPaymentterm.getName }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -165,21 +192,31 @@
                                         <th class="text-center">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tablaProductos">
-                                    {% for orderline in order.orderlines %}
+                                <tbody id="tablaProductos"> 
+                                    {% for invoiceline in invoice.getCInvoicelines %}
                                     <tr class="text-center">
-                                        <td>{{ orderline.line }}</td>
-                                        <td class="text-left">{{ orderline.product }}</td>
-                                        <td>{{ orderline.value }}</td>
-                                        <td class="text-right">{{ number_format(orderline.pricelist, 2) }}</td>
-                                        <td class="text-right" style="cursor: pointer;" id="{{ orderline.sm_orderline_id|base64 }}">
-                                            <p data-line="{{ orderline.sm_orderline_id }}" onclick="App.Jaxon.OrderLine.changeQty(this.dataset.line)">{{ number_format(orderline.qtyentered, 2) }}</p>
-                                        </td>
-                                        <td class="text-right" id="{{ (orderline.sm_orderline_id ~ 'amt')|base64 }}">
-                                            {{ number_format(orderline.linenetamt, 2) }}
-                                        </td>
+                                        <td>{{ invoiceline.getLine }}</td>
+                                        <td class="text-left">{{ invoiceline.getMProduct.getName }}</td>
+                                        <td>{{ invoiceline.getMProduct.getValue }}</td>
+                                        <td class="text-right">{{ number_format(invoiceline.getPricelist, 2) }}</td>
+                                        <td class="text-right">{{ number_format(invoiceline.getQtyentered, 2) }}</td>
+                                        <td class="text-right">{{ number_format(invoiceline.getLinenetamt, 2) }}</td>
                                     </tr>
                                     {% endfor %}
+
+                                    {% if invoice.getDocstatus == 'DR' %}
+                                        <tr id="cleanline">
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">
+                                                <input id="product_1" type="text" placeholder="XXXX000001">
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td><button class="btn btn-info float-right" data-toggle="modal" data-target="#productModal"><i class="fas fa-plus"></i> Agregar Producto</button></td>
+                                        </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -194,7 +231,7 @@
                                                     <i class="fas fa-dollar-sign"></i>
                                                 </span>
                                             </div>
-                                            <input id="totallines" type="text" value="0.00" class="form-control" disabled>
+                                            <input id="totallines" type="text" value="{{ number_format(invoice.getTotallines, 2) }}" class="form-control" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -207,7 +244,7 @@
                                                     <i class="fas fa-balance-scale"></i>
                                                 </span>
                                             </div>
-                                            <input id="taxamt" type="text" value="0.00" class="form-control" disabled>
+                                            <input id="taxamt" type="text" value="{{ number_format(invoice.getGrandtotal - invoice.getTotallines, 2) }}" class="form-control" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -220,7 +257,7 @@
                                                     <i class="fas fa-receipt"></i>
                                                 </span>
                                             </div>
-                                            <input id="grandtotal" type="text" value="0.00" class="form-control" disabled>
+                                            <input id="grandtotal" type="text" value="{{ number_format(invoice.getGrandtotal, 2) }}" class="form-control" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -228,7 +265,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>  
             <div class="row">
                 <div class="col-12">
                     <div class="card card-outline card-info">
@@ -307,18 +344,18 @@
                         <div class="card-header">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <form onsubmit="event.preventDefault(); $('#buscarProducto').click();">
+                                    <form onsubmit="event.preventDefault(); $('#getProducts').click();">
                                         <div class="form-group">
-                                            <label for="codigo_producto">Producto</label>
+                                            <label for="product_value">Producto</label>
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">
                                                         <i class="fas fa-boxes"></i>
                                                     </span>
                                                 </div>
-                                                <input id="codigo_producto" type="text" class="form-control" placeholder="Nombre, C&oacute;digo o SKU">
+                                                <input id="product_value" type="text" class="form-control" placeholder="Nombre, C&oacute;digo o SKU">
                                                 <div class="input-group-prepend">
-                                                    <button id="buscarProducto" class="btn btn-info btn-flat" type="button">
+                                                    <button id="getProducts" class="btn btn-info btn-flat" type="button">
                                                         <i class="fas fa-search"></i>
                                                     </button>
                                                 </div>
@@ -328,7 +365,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="productos" class="card-body">
+                        <div id="products" class="card-body">
                         </div>
                     </div>
                 </div>
@@ -362,4 +399,6 @@
     <script src="/node_modules/datatables.net-searchbuilder-bs4/js/searchBuilder.bootstrap4.min.js"></script>
 {% endblock %}
 
-{% block scripts %}{% endblock %}
+{% block scripts %}
+    <script>App.Jaxon.Invoice.init();</script>
+{% endblock %}

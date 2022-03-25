@@ -2,31 +2,30 @@
 
 namespace App\Jaxon;
 
+use App\Entity\AdUser;
 use App\Model\User as ModelUser;
+use App\Repository\AdUserRepository;
 use App\Util;
 use Jaxon\Response\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class User extends Base
-{
-    public $data;
-    
+{    
     /**
      * Compara la clave suministrada con los datos del usuario
      * 
-     * @param array $user Datos del usuario
+     * @param AdUser $user Datos del usuario
      * @param string $password Clave para encriptar
      * 
      * @return bool 
      */
     public static function auth(
-        Array $user, 
+        AdUser $user, 
         String $password
-    )
+    ): bool
     {
-        $c1     = hash("sha512", Util::Hex2String($user['salt']) . $password, true);
-
-        for($i = 0; $i < 1000; $i++){ $c1 = hash("sha512", $c1, true); }
-        return Util::String2Hex($c1) == $user['password'] ? true : false;
+        $password = Util::Encode($user->getSalt(), $password );
+        return Util::String2Hex($password) == $user->getPassword() ? true : false;
     }
 
     /**
@@ -34,15 +33,14 @@ class User extends Base
      * 
      * @param string $email Correo del usuario
      * 
-     * @return bool
+     * @return AdUser
      */
     public function exist(
         String $email
     )
     {
-        $model      = new ModelUser;
-        $this->data = $model->get_user($email);
-        return (is_array($this->data)) ? true : false ;
+        $RUser = new AdUserRepository($this->manager);
+        return $RUser->findBy(['email' => $email], null, 1);
     }
 
     public function init()
@@ -58,33 +56,31 @@ class User extends Base
      * 
      * @param array $formData Datos del usuario
      * 
-     * @return object Jaxon\Response\Response
+     * @return Jaxon\Response\Response Respuesta
      */
     public function login(
         Array $formData = null
-    )
+    ): Response
     {
         $jxnr = new Response;
+        $session = new Session();
 
-        if($formData['email'] != '' && $formData['password'] != ''){
+        if(empty($formData['email']) && empty($formData['password']))
+            return $jxnr->alert("Introduzca datos validos!");
 
-            if( $this->exist($formData['email']) ){
-            
-                if( self::auth($this->data, $formData['password']) ){
-                    $_SESSION['user'] = $this->data;
-                    $_SESSION['user']['remember'] = (isset($formData['remember']) && $formData['remember'] == "on") ? true : false ;
-                    $jxnr->redirect("/organizacion");
-                } else {
-                    $jxnr->alert("Las credenciales no coinciden");
-                }
+        $user = $this->exist($formData['email']);
+        
+        if( empty($user) )
+            return $jxnr->alert("Este usuario no se encuentra registrado");
 
-            } else {
-                $jxnr->alert("Este usuario no se encuentra registrado");
-            }
+        if( !$user[0]->getIsactive() || $user[0]->getIslocked() )
+            return $jxnr->alert("El usuario esta inactivo o bloqueado");
+        
+        if( !self::auth($user[0], $formData['password']) )
+            return $jxnr->alert("Las credenciales no coinciden");
 
-        } else {
-            $jxnr->alert("Introduzca datos validos!");
-        }
+        $session->set('user', $user[0]);
+        $jxnr->redirect("/organizacion");
 
         return $jxnr;
     }
@@ -92,12 +88,14 @@ class User extends Base
     /**
      * Destruye las variables de session del usuario
      * 
-     * @return object Jaxon\Response\Response
+     * @return Jaxon\Response\Response Respuesta
      */
-    public function logout()
+    public function logout(): Response
     {
-        @session_destroy();
         $jxnr = new Response;
+        $session = new Session();
+
+        $session->invalidate();
         $jxnr->redirect('/');
         return $jxnr;
     }

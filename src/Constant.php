@@ -11,6 +11,12 @@ class Constant
     public const AD_Client_ID = 1000001;
 
     /**
+     * Actividad por defecto
+     * @return int Ventas Comercial
+     */
+    public const C_Activity_ID = 1000021;
+
+    /**
      * Tercero por defecto
      * @return int Estandar
      */

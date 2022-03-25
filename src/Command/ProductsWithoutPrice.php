@@ -6,6 +6,8 @@ use App\Constant;
 use App\Jaxon\Product;
 use App\Jaxon\User;
 use Knp\Snappy\Pdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,6 +36,8 @@ class ProductsWithoutPrice extends Command
 
     protected $pdf;
 
+    protected $spreedsheet;
+
     protected $twig;
 
     protected $user;
@@ -59,7 +63,11 @@ class ProductsWithoutPrice extends Command
             'print-media-type' => true
         ]);
         $this->pdf->setTemporaryFolder(dirname(__DIR__) . '/../public/tmp/');
+
+        // XLSX options
+        $this->spreedsheet = new Spreadsheet();
         
+        // TWIG options
         $this->twig     = new Environment($this->loader, [
             'cache'         => false,//'templates/cache',
             'autoescape'    => false,
@@ -86,6 +94,7 @@ class ProductsWithoutPrice extends Command
                 // Busca los usuarios por rol
                 $users = $this->user->getByRole($rol);
                 
+                // Verfica la cantidad de usuarios
                 if($users->NumRows() > 0) {
 
                     // Recorre los usuarios
@@ -111,22 +120,30 @@ class ProductsWithoutPrice extends Command
                                 ]);
 
                                 // 3) Obtener PDF
-                                $document = $this->pdf->getOutputFromHtml($html);
+                                $pdf = $this->pdf->getOutputFromHtml($html);
 
-                                // 4) Preparar Correo
+                                // 4) Obtener XLSX
+                                $xlsx = $this->export($products);
+
+                                // 5) Preparar Correo
                                 $email = (new Email())
                                     ->sender('no-reply@gplus.com.ve')
                                     ->addFrom('no-reply@gplus.com.ve')
                                     ->addReplyTo('no-reply@gplus.com.ve')
                                     ->to($user['email'])
-                                    ->subject('Productos sin precio!')
-                                    ->attach($document, sprintf('ProductosSinPrecio%s.pdf', date('YmdHis')))
-                                    ->html('<h3>Reporte de Productos sin Precio</h3>');
+                                    ->subject('Reporte de Productos sin Estimacion de Precio')
+                                    ->attach($pdf, sprintf('ProductosSinEstimacionDePrecio%s.pdf', date('YmdHis')))
+                                    ->attach(fopen($xlsx, 'r'), $xlsx)
+                                    ->html('<h3>Reporte de Productos sin Estimacion de Precio</h3>');
 
                                 $transport = new GmailSmtpTransport('notificacion@gplus.com.ve', 'W0Phqh7$');
                                 
-                                // 5) Enviar y listar
+                                // 6) Enviar Correo
                                 if ( $transport->send($email) ) {
+                                    // 6.1) Borrar XLSX temporal
+                                    unlink($xlsx);
+
+                                    // 6.2) Listar Productos
                                     foreach ($products as $product) {
                                         $productToUpdate[$product['m_product_id']] = $product;
                                     }
@@ -164,11 +181,103 @@ class ProductsWithoutPrice extends Command
         
         $io->progressFinish();
 
-        if (count($productToUpdate) > 0)
+        if (count($productToUpdate) > 0) {
+            $io->info('Total: ('. count($productToUpdate) .') Facturas Vencidas');
             $io->success('Reporte de productos sin precio enviado!');
-        else
+        } else {
             $io->success('No hay productos nuevos!');
+        }
 
         return 1;
+    }
+
+    public function export($products)
+    {
+        // 1) Preparar XLSX
+        $sheet = $this->spreedsheet->getActiveSheet();
+
+        // 1.1) Columnas 
+        $sheet->setTitle('Productos sin Estmacion de Precio');
+        $sheet->getCell('A1')->setValue('Marca');
+        $sheet->getCell('B1')->setValue('Organizacion');
+        $sheet->getCell('C1')->setValue('Descrpcion');
+        $sheet->getCell('D1')->setValue('Tercero');
+        $sheet->getCell('E1')->setValue('Nro Documento');
+        $sheet->getCell('F1')->setValue('Fecha de Orden');
+        $sheet->getCell('G1')->setValue('Codigo');
+        $sheet->getCell('H1')->setValue('Producto');
+        $sheet->getCell('I1')->setValue('Estatus del Producto');
+        $sheet->getCell('J1')->setValue('Cantidad Ordenada');
+        $sheet->getCell('K1')->setValue('Cantidad Entregada');
+        $sheet->getCell('L1')->setValue('Cantidad Reservada');
+        $sheet->getCell('M1')->setValue('Fecha Prometida ETD');
+        $sheet->getCell('N1')->setValue('Proforma');
+        $sheet->getCell('O1')->setValue('Total Contenedores');
+        $sheet->getCell('P1')->setValue('Pendiente por Embarcar');
+        $sheet->getCell('Q1')->setValue('Gran Total');
+        $sheet->getCell('R1')->setValue('Estado Documento');
+        $sheet->getCell('S1')->setValue('Nro Documento');
+        $sheet->getCell('T1')->setValue('Nro Factura Internacional');
+        $sheet->getCell('U1')->setValue('Nro BL');
+        $sheet->getCell('V1')->setValue('Total Contenedores');
+        $sheet->getCell('W1')->setValue('Fecha ETA');
+        $sheet->getCell('X1')->setValue('Fecha Contable');
+        $sheet->getCell('Y1')->setValue('Estado Documento');
+        $sheet->getCell('Z1')->setValue('Nro Documento');
+        $sheet->getCell('AA1')->setValue('Estado Documento');
+        $sheet->getCell('AB1')->setValue('Nro Documento');
+        $sheet->getCell('AC1')->setValue('Fecha Contable');
+        $sheet->getCell('AD1')->setValue('Estado Documento');
+
+        // 1.2) Filas
+        $sheet->fromArray($this->processData($products), null, 'A2', true);
+        
+        // 1.3) Documento
+        $xlsx = new Xlsx($this->spreedsheet);
+        $fileName = sprintf('ProductosSinPrecio%s.xlsx', date('YmdHis'));
+        $xlsx->save($fileName);
+
+        return $fileName;
+    }
+
+    private function processData($data): array
+    {
+        $products = [];
+        foreach ($data as $product) {
+            $products[] = [
+                'Marca'                     => $product['brand'],
+                'Organizacion'              => $product['organization'],
+                'Descrpcion'                => $product['orderdescription'],
+                'Tercero'                   => $product['bpartner'],
+                'Nro Documento'             => $product['order'],
+                'Fecha de Orden'            => $product['dateordered'],
+                'Codigo'                    => $product['value'],
+                'Producto'                  => $product['description'],
+                'Estatus del Producto'      => $product['status'],
+                'Cantidad Ordenada'         => $product['qtyordered'],
+                'Cantidad Entregada'        => $product['qtyreceipt'],
+                'Cantidad Reservada'        => $product['qtyreserved'],
+                'Fecha Prometida ETD'       => $product['sm_fecha_etd'],
+                'Proforma'                  => $product['sm_preform'],
+                'Total Contenedores'        => $product['sm_containerqty'],
+                'Pendiente por Embarcar'    => 0,
+                'Gran Total'                => $product['grandtotal'],
+                'Estado Documento'          => $product['orderstatus'],
+                'Nro Documento'             => $product['receipt'],
+                'Nro Factura Internacional' => $product['sm_invoicedocumentno'],
+                'Nro BL'                    => $product['sm_invoicefiles'],
+                'Total Contenedores'        => $product['sm_containerqty'],
+                'Fecha ETA'                 => $product['sm_fecha_eta'],
+                'Fecha Contable'            => $product['receiptdateacct'],
+                'Estado Documento'          => $product['receiptstatus'],
+                'Nro Documento'             => $product['confirm'],
+                'Estado Documento'          => $product['confirmstatus'],
+                'Nro Documento'             => $product['invoice'],
+                'Fecha Contable'            => $product['invoicedateacct'],
+                'Estado Documento'          => $product['invoicestatus']
+            ];
+        }
+
+        return $products;
     }
 }

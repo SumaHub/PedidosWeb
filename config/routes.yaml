@@ -1,23 +1,6 @@
-dashboard:
-  path: /dashboard
-  controller: App\Controller\DashboardController::dashboard
-
 imagen_subir:
   path: /producto/imagen/{codigo}
   controller: App\Controller\ProductController::add_image
-
-# Home
-index:
-  path: /
-  controller: App\Controller\UserController::index
-
-ingresar:
-  path: /ingresar
-  controller: App\Controller\UserController::login
-
-organizacion:
-  path: /organizacion
-  controller: App\Controller\UserController::organization
 
 # Facturas
 facturas:
@@ -34,30 +17,5 @@ jaxon:
 
 # Pedidos
 pedido_temp:
-  path: /pedido/temp/{order_id}
+  path: /pedido/temp/{documentno}
   controller: App\Controller\OrderController::edit
-
-pedido_view:
-  path: /pedido/{order_id}
-  controller: App\Controller\OrderController::view
-
-pedidos:
-  path: /pedidos
-  controller: App\Controller\OrderController::list
-  
-pedido_nuevo:
-  path: /pedido
-  controller: App\Controller\OrderController::new
-
-# Productos
-producto:
-  path: /producto/{codigo}
-  controller: App\Controller\ProductController::show
-
-productos:
-  path: /productos
-  controller: App\Controller\ProductController::list
-
-salir:
-  path: /salir
-  controller: App\Controller\UserController::login

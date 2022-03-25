@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Controller\DBController;
+use App\Repository\CBpartnerRepository;
 
 class BPartner
 {
@@ -74,26 +75,19 @@ class BPartner
         return (is_null($this->msj)) ? $this->rs : $this->msj ;
     }
 
-    public static function qty_clients(
-        Int $SalesRep_ID = null
+    public static function qty_bpartners(
+        Int $SalesRep_ID = null,
+        $doctrine
     )
     {
-        $db = DBController::conectar();
-
-        if($db->IsConnected()){
-            list($SalesRep_ID, $IsSalesRep) = array( $SalesRep_ID ?: $_SESSION['user']['ad_user_id'], $_SESSION['user']['issalesrep'] );
-
-            $clients = $db->GetOne(
-                "SELECT COUNT(*) 
-                FROM C_BPartner cb 
-                JOIN SM_Sales_Rep ssr ON ssr.C_BPartner_ID = cb.C_BPartner_ID 
-                WHERE cb.IsActive = 'Y' AND cb.IsCustomer = 'Y' 
-                AND CASE WHEN '{$IsSalesRep}' = 'Y' THEN ssr.SalesRep_ID = {$SalesRep_ID} ELSE true END"
+        $repository = new CBpartnerRepository($doctrine);
+        $bpartners = $repository->count(
+            [
+                'isactive' => 'Y',
+                'iscustomer' => 'Y'
+            ]
             );
-        } 
-
-        $db->Close();
-        return (isset($clients) && $clients > 0) ? $clients : 0 ;
+        return $bpartners ;
     }
 }
 ?>
