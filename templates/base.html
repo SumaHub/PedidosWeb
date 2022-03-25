@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% block head %}
+            {{ include('section/head.html') }}
+        {% endblock %}
+    </head>
+    <body class="{{ bodyClass }}">
+        {% block wrapper %}
+
+        {% endblock %}
+
+        {% block javascript %}
+            {{ include('section/javascript.html') }}
+        {% endblock %}
+
+        {% block scripts %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/home/{{ home_path }}pedido.sumagroups.com/public/assets/css/adminlte.css">
+    <!-- Datatable -->
+    <link rel="stylesheet" href="/home/{{ home_path }}pedido.sumagroups.com/public/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+
+{% block wrapper %}
+    <div class="wrapper" style="page-break-before:always;">
+        <div class="content">
+            <div id="contenedor" class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-6 d-flex flex-column align-items-start justify-content-center">
+                                        <h3 class="card-title">Productos Nuevos</h3>
+                                        <h3 class="card-title"><strong>Documentos expresados en USD</strong></h3>
+                                        <h3 class="card-title">{{ "now"|date("Y/m/d") }}</h3>
+                                    </div>
+                                    <div class="col-6 d-flex flex-column align-items-end justify-content-center">
+                                        <h3 class="card-title">{{ user.name }}</h3>
+                                        <h3 class="card-title"><a href="mailto:{{ user.email }}">{{ user.email }}</a></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body table-responsive px-0">
+                                <table id="products-table" class="table table-striped table-valign-middle">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th colspan="2"></th>
+                                            <th colspan="16" class="border">Orden de Compra Internacional</th>
+                                            <th colspan="7" class="border">Recepci&oacute;n del Producto</th>
+                                            <th colspan="2" class="border">Confirmaci&oacute;n</th>
+                                            <th colspan="3" class="border">Factura del Proveedor</th>
+                                        </tr>
+                                        <tr class="text-center">
+                                            <th class="border">Marca</th>
+                                            <th class="border">Organizaci&oacute;n</th>
+                                            <th class="border">Descripci&oacute;n</th>
+                                            <th class="border">Tercero</th>
+                                            <th class="border">Nro Documento</th>
+                                            <th class="border">Fecha de Orden</th>
+                                            <th class="border">C&oacute;digo</th>
+                                            <th class="border">Producto</th>
+                                            <th class="border">Estatus del Producto</th>
+                                            <th class="border">Cantidad Ordenada</th>
+                                            <th class="border">Cantidad Entregada</th>
+                                            <th class="border">Cantidad Reservada</th>
+                                            <th class="border">Fecha Prometida ETD</th>
+                                            <th class="border">Proforma</th>
+                                            <th class="border">Total Contenedores</th>
+                                            <th class="border">Pendiente por Embarcar</th>
+                                            <th class="border">Gran Total</th>
+                                            <th class="border">Estado Documento</th>
+                                            <th class="border">Nro Documento</th>
+                                            <th class="border">Nro Factura Internacional</th>
+                                            <th class="border">Nro BL</th>
+                                            <th class="border">Total Contenedores</th>
+                                            <th class="border">Fecha ETA</th>
+                                            <th class="border">Fecha Contable</th>
+                                            <th class="border">Estado Documento</th>
+                                            <th class="border">Nro Documento</th>
+                                            <th class="border">Estado Documento</th>
+                                            <th class="border">Nro Documento</th>
+                                            <th class="border">Fecha Contable</th>
+                                            <th class="border">Estado Documento</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% set renglon = 1 %}
+                                    
+                                    {% for product in products %}
+                                        <tr>
+                                            <td class="border">{{ product.brand }}</td>
+                                            <td class="border">{{ product.organization }}</td>
+                                            <td class="border">{{ product.orderdescription }}</td>
+                                            <td class="border">{{ product.bpartner }}</td>
+                                            <td class="border">{{ product.order }}</td>
+                                            <td class="border">{{ product.dateordered }}</td>
+                                            <td class="border">{{ product.value }}</td>
+                                            <td class="border">{{ product.description }}</td>
+                                            <td class="border">{{ product.status }}</td>
+                                            <td class="border">{{ product.qtyordered|format_number }}</td>
+                                            <td class="border">{{ product.qtyreceipt|format_number }}</td>
+                                            <td class="border">{{ product.qtyreserved|format_number }}</td>
+                                            <td class="border">{{ product.sm_fecha_etd }}</td>
+                                            <td class="border">{{ product.sm_preform }}</td>
+                                            <td class="border">{{ product.sm_containerqty }}</td>
+                                            <td class="border">0</td>
+                                            <td class="border">{{ product.grandtotal|format_currency('USD') }}</td>
+                                            <td class="border">{{ product.orderstatus }}</td>
+                                            <td class="border">{{ product.receipt }}</td>
+                                            <td class="border">{{ product.sm_invoicedocumentno }}</td>
+                                            <td class="border">{{ product.sm_invoicefiles }}</td>
+                                            <td class="border">{{ product.sm_containerqty }}</td>
+                                            <td class="border">{{ product.sm_fecha_eta }}</td>
+                                            <td class="border">{{ product.receiptdateacct }}</td>
+                                            <td class="border">{{ product.receiptstatus }}</td>
+                                            <td class="border">{{ product.confirm }}</td>
+                                            <td class="border">{{ product.confirmstatus }}</td>
+                                            <td class="border">{{ product.invoice }}</td>
+                                            <td class="border">{{ product.invoicedateacct }}</td>
+                                            <td class="border">{{ product.invoicestatus }}</td>
+                                        </tr>
+                                        {% set renglon = renglon + 1 %}
+
+                                        <!-- Salto de Pagina -->
+                                        {% if renglon >= 39 %}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="wrapper" style="page-break-before:always;">
+                                                <div class="content">
+                                                    <div id="contenedor" class="container-fluid">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header">
+                                                                        <div class="row">
+                                                                            <div class="col-6 d-flex flex-column align-items-start justify-content-center">
+                                                                                <h3 class="card-title">Facturas Vencidas - Notificaci&oacute;n #{{ node }}</h3>
+                                                                                <h3 class="card-title"><strong>Documentos expresados en USD</strong></h3>
+                                                                                <h3 class="card-title">{{ "now"|date("Y/m/d") }}</h3>
+                                                                            </div>
+                                                                            <div class="col-6 d-flex flex-column align-items-end justify-content-center">
+                                                                                <h3 class="card-title">{{ user.name }}</h3>
+                                                                                <h3 class="card-title"><a href="mailto:{{ user.email }}">{{ user.email }}</a></h3>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="card-body table-responsive px-0">
+                                                                        <table id="invoices-table" class="table table-striped table-valign-middle">
+                                                                            <tbody>
+                                            {% set renglon = 1 %}
+                                        {% endif %}
+
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

@@ -1,0 +1,38 @@
+/TODO.txt
+/Jaxon.txt
+/*.lock
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
+
+###> cache ###
+/.sass-cache/
+/public/tmp/
+/templates/cache/
+###< cache ###
+
+###> resources ###
+/migrations/
+/build/
+/public/node_modules/
+/public/vendor/
+/public/assets/img/
+/public/assets/vendor/
+###< resources ###

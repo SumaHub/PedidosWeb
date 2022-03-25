@@ -1,0 +1,99 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+    <!-- Brand Logo -->
+    <div class="top-sidebar brand-link d-flex align-content-center">
+        <div class="d-flex justify-content-center align-items-center">
+            <img src="/assets/img/AdminLTELogo.png" alt="Cat&aacute;logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        </div>
+        <div class="brand-info d-flex flex-column">
+            <a href="/">
+                <span class="brand-text font-weight-light text-white">Pedidos Web</span>
+            </a>
+            <p class="brand-text text-xs mb-0">
+                <span>{{ organization.getName }}</span>
+                <!--<a href="/organizacion"><i class="ml-3 fas fa-exchange-alt"></i></a>-->
+            </p>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        {% set fullname = user.getDescription|split(' ') %}
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+            <div class="image">
+                <img src="https://ui-avatars.com/api/?name={{ fullname[0] }}+{{ fullname[2] }}" class="img-circle elevation-2" alt="{{ user.name }}">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">
+                    <p class="mb-0 text-capitalize">{{ fullname[0] }} {{ fullname[2] }}</p>
+                    <small>{{ user.getEmail }}</small>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item">
+                    <a href="/" class="nav-link active">
+                        <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-user"></i>
+                        <p>General <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item pl-2"><a href="/perfil" class="nav-link"><i class="fas fa-address-card nav-icon"></i><p>Perfil</p></a></li>
+                        <li class="nav-item pl-2"><a href="/notificaciones" class="nav-link"><i class="fas fa-bell nav-icon"></i><p>Notificaciones</p></a></li>
+                        <li class="nav-item pl-2"><a href="/salir" class="nav-link"><i class="fas fa-power-off nav-icon"></i><p>Cerrar Sesi&oacute;n</p></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-file-invoice"></i>
+                        <p>Reportes <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item pl-2"><a href="/analisis-de-vencimiento" class="nav-link"><i class="fas fa-file-invoice-dollar nav-icon"></i><p>Analisis de Vencimiento</p></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Tercero <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item pl-2"><a href="/terceros" class="nav-link"><i class="fas fa-user-tie nav-icon"></i><p>Clientes</p></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>Ventas <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item pl-2"><a href="/pedido" class="nav-link"><i class="fas fa-plus nav-icon"></i><p>Nuevo Pedido</p></a></li>
+                        <li class="nav-item pl-2"><a href="/pedidos" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Pedidos</p></a></li>
+                        <li class="nav-item pl-2"><a href="/facturas" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Facturas</p></a></li>
+                        <li class="nav-item pl-2"><a href="/productos" class="nav-link"><i class="fas fa-boxes nav-icon"></i><p>Articulos</p></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>Ayuda <i class="right fas fa-angle-left"></i></p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item"><a href="/acerca-de" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Acerca De</p></a></li>
+                        <li class="nav-item"><a href="/faqs" class="nav-link"><i class="far fa-circle nav-icon"></i><p>FAQs</p></a></li>
+                        <li class="nav-item"><a href="/manual" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Manual</p></a></li>
+                        <li class="nav-item"><a href="/soporte" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Soporte T&eacute;cnico</p></a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
