@@ -29,7 +29,8 @@
 ###< cache ###
 
 ###> resources ###
-/build/scss/
+/migrations/
+/build/
 /public/node_modules/
 /public/vendor/
 /public/assets/img/
