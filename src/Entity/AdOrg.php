@@ -74,6 +74,11 @@ class AdOrg
      */
     private $c_invoices;
 
+    /**
+     * @ORM\OneToMany(targetEntity=MInout::class, mappedBy="ad_org")
+     */
+    private $m_inouts;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -81,6 +86,7 @@ class AdOrg
         $this->m_warehouse = new ArrayCollection();
         $this->c_orders = new ArrayCollection();
         $this->c_invoices = new ArrayCollection();
+        $this->m_inouts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -328,6 +334,36 @@ class AdOrg
             // set the owning side to null (unless already changed)
             if ($cInvoice->getAdOrg() === $this) {
                 $cInvoice->setAdOrg(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|MInout[]
+     */
+    public function getMInouts(): Collection
+    {
+        return $this->m_inouts;
+    }
+
+    public function addMInout(MInout $mInout): self
+    {
+        if (!$this->m_inouts->contains($mInout)) {
+            $this->m_inouts[] = $mInout;
+            $mInout->setAdOrg($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMInout(MInout $mInout): self
+    {
+        if ($this->m_inouts->removeElement($mInout)) {
+            // set the owning side to null (unless already changed)
+            if ($mInout->getAdOrg() === $this) {
+                $mInout->setAdOrg(null);
             }
         }
 

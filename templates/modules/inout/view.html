@@ -15,7 +15,7 @@
         <div id="contenedor" class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <form id="invoice">
+                    <form id="shipment">
                         <div class="card card-outline card-info">
                             <div class="card-body">
                                 <div class="row">
@@ -28,7 +28,7 @@
                                                         <i class="fas fa-building"></i>
                                                     </span>
                                                 </div>
-                                                <input type="text" id="organization" name="organization" class="form-control" value="{{ invoice.getAdOrg.getName }}" disabled>
+                                                <input type="text" id="organization" name="organization" class="form-control" value="{{ shipment.getAdOrg.getName }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -42,7 +42,7 @@
                                                     </span>
                                                 </div>
                                                 <select name="bpartner" id="bpartner" class="form-control" readonly="true">
-                                                    <option value="{{ invoice.getCBpartnerId }}" aria-checked="true">{{ invoice.getCBpartner.getName }}</option>
+                                                    <option value="{{ shipment.getCBpartnerId }}" aria-checked="true">{{ shipment.getCBpartner.getName }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -57,7 +57,7 @@
                                                     </span>
                                                 </div>
                                                 <select name="documenttype" id="documenttype" class="form-control" readonly="true">
-                                                    <option value="{{ invoice.getCDoctypeId }}" checked="true">{{ invoice.getCDoctype.getName }}</option>
+                                                    <option value="{{ shipment.getCDoctypeId }}" checked="true">{{ shipment.getCDoctype.getName }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -71,7 +71,7 @@
                                                         <i class="fas fa-search"></i>
                                                     </span>
                                                 </div>
-                                                <input id="documentno" type="text" value="{{ invoice.getDocumentno }}" class="form-control" disabled>
+                                                <input id="documentno" type="text" value="{{ shipment.getDocumentno }}" class="form-control" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -79,7 +79,7 @@
                                         <div class="form-group">
                                             <label for="description">Descripci&oacute;n</label>
                                             <div class="input-group mb-3">
-                                                <textarea name="description" id="description" class="form-control" rows="2" disabled>{{ invoice.getDescription }}</textarea>
+                                                <textarea name="description" id="description" class="form-control" rows="2" disabled>{{ shipment.getDescription }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -92,7 +92,7 @@
                                                         <i class="fas fa-map"></i>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="address" id="address" class="form-control" value="{{ invoice.getCBpartnerLocation.getCLocation.getAddress1 }}" disabled>
+                                                <input type="text" name="address" id="address" class="form-control" value="{{ shipment.getCBpartnerLocation.getCLocation.getAddress1 }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -105,7 +105,7 @@
                                                         <i class="fas fa-phone"></i>
                                                     </span>
                                                 </div>
-                                                <input id="phone" type="text" class="form-control" value="{{ invoice.getCBpartnerLocation.getPhone }}" disabled>
+                                                <input id="phone" type="text" class="form-control" value="{{ shipment.getCBpartnerLocation.getPhone }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -119,7 +119,7 @@
                                                     </span>
                                                 </div>
                                                 <select name="currency" id="currency" class="form-control" disabled>
-                                                    <option value="{{ invoice.getCCurrencyId }}">{{ invoice.getCCurrency.getIsoCode }}</option>
+                                                    <option value="{{ shipment.getCCurrencyId }}">{{ shipment.getCCurrency.getIsoCode }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -133,7 +133,7 @@
                                                         <i class="fas fa-clipboard-list"></i>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="pricelist" id="pricelist" class="form-control" value="{{ invoice.getMPricelist.getName }}" disabled>
+                                                <input type="text" name="pricelist" id="pricelist" class="form-control" value="{{ shipment.getMPricelist.getName }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -147,10 +147,10 @@
                                                     </span>
                                                 </div>
                                                 <select name="paymentrule" id="paymentrule" class="form-control" disabled>
-                                                    <option value="{{ invoice.getPaymentrule }}" checked="true">
-                                                        {% if  invoice.getPaymentrule == 'P' %}
+                                                    <option value="{{ shipment.getPaymentrule }}" checked="true">
+                                                        {% if  shipment.getPaymentrule == 'P' %}
                                                         Con Termino de Pago
-                                                        {% elseif invoice.getPaymentrule == 'M' %}
+                                                        {% elseif shipment.getPaymentrule == 'M' %}
                                                         Multiples Medios de Pago
                                                         {% endif %}
                                                     </option>    
@@ -167,7 +167,7 @@
                                                         <i class="fas fa-hand-holding-usd"></i>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="paymentterm" id="paymentterm" class="form-control" value="{{ invoice.getCPaymentterm.getName }}" disabled>
+                                                <input type="text" name="paymentterm" id="paymentterm" class="form-control" value="{{ shipment.getCPaymentterm.getName }}" disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -187,24 +187,22 @@
                                         <th class="text-center">#</th>
                                         <th class="text-center">Nombre</th>
                                         <th class="text-center">C&oacute;digo</th>
-                                        <th class="text-center">Precio</th>
                                         <th class="text-center">Cantidad</th>
-                                        <th class="text-center">Total</th>
+                                        <th class="text-center">Cantidad Confirmada</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablaProductos"> 
-                                    {% for invoiceline in invoice.getCInvoicelines %}
+                                    {% for inoutline in shipment.getMInoutlines %}
                                     <tr class="text-center">
-                                        <td>{{ invoiceline.getLine }}</td>
-                                        <td class="text-left">{{ invoiceline.getMProduct.getName }}</td>
-                                        <td>{{ invoiceline.getMProduct.getValue }}</td>
-                                        <td class="text-right">{{ number_format(invoiceline.getPricelist, 2) }}</td>
-                                        <td class="text-right">{{ number_format(invoiceline.getQtyentered, 2) }}</td>
-                                        <td class="text-right">{{ number_format(invoiceline.getLinenetamt, 2) }}</td>
+                                        <td>{{ inoutline.getLine }}</td>
+                                        <td class="text-left">{{ inoutline.getMProduct.getName }}</td>
+                                        <td>{{ inoutline.getMProduct.getValue }}</td>
+                                        <td class="text-right">{{ number_format(inoutline.getQtyentered, 2) }}</td>
+                                        <td class="text-right">{{ number_format(inoutline.getConfirmedqty, 2) }}</td>
                                     </tr>
                                     {% endfor %}
 
-                                    {% if invoice.getDocstatus == 'DR' %}
+                                    {% if shipment.getDocstatus == 'DR' %}
                                         <tr id="cleanline">
                                             <td style="vertical-align: middle; text-align: center;">+</td>
                                             <td style="vertical-align: middle; text-align: center;">+</td>
@@ -213,55 +211,11 @@
                                             </td>
                                             <td style="vertical-align: middle; text-align: center;">+</td>
                                             <td style="vertical-align: middle; text-align: center;">+</td>
-                                            <td style="vertical-align: middle; text-align: center;">+</td>
                                             <td><button class="btn btn-info float-right" data-toggle="modal" data-target="#productModal"><i class="fas fa-plus"></i> Agregar Producto</button></td>
                                         </tr>
                                     {% endif %}
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label for="totallines">Sub Total</label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-dollar-sign"></i>
-                                                </span>
-                                            </div>
-                                            <input id="totallines" type="text" value="{{ number_format(invoice.getTotallines, 2) }}" class="form-control" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label for="taxamt">Impuestos</label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-balance-scale"></i>
-                                                </span>
-                                            </div>
-                                            <input id="taxamt" type="text" value="{{ number_format(invoice.getGrandtotal - invoice.getTotallines, 2) }}" class="form-control" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label for="grandtotal">Total</label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-receipt"></i>
-                                                </span>
-                                            </div>
-                                            <input id="grandtotal" type="text" value="{{ number_format(invoice.getGrandtotal, 2) }}" class="form-control" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -271,9 +225,8 @@
                     <div class="card card-outline card-info">
                         <div class="card-body">
                             <div class="d-flex justify-content-center">
-                                <button type="button" class="mx-1 btn btn-lg btn-success"><i class="far fa-envelope"></i> Enviar Pedido</button>
-                                <button type="button" class="mx-1 btn btn-lg btn-warning"><i class="far fa-copy"></i> Clonar Pedido</button>
-                                <button type="button" class="mx-1 btn btn-lg btn-info"><i class="fas fa-print"></i> Imprimir Pedido</button>
+                                <button type="button" class="mx-1 btn btn-lg btn-success"><i class="far fa-envelope"></i> Enviar Entrega</button>
+                                <button type="button" class="mx-1 btn btn-lg btn-info"><i class="fas fa-print"></i> Imprimir Entrega</button>
                             </div>
                         </div>
                     </div>

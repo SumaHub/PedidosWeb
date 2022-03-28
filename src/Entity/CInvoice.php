@@ -179,6 +179,12 @@ class CInvoice
     private $isdiscountprinted = 'Y';
 
     /**
+     * @ORM\ManyToOne(targetEntity=CCurrency::class)
+     * @ORM\JoinColumn(referencedColumnName="c_currency_id")
+     */
+    private $c_currency;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $c_currency_id;
@@ -208,6 +214,12 @@ class CInvoice
      * @ORM\Column(type="float")
      */
     private $grandtotal = 0;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=MPricelist::class)
+     * @ORM\JoinColumn(referencedColumnName="m_pricelist_id")
+     */
+    private $m_pricelist;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -663,6 +675,18 @@ class CInvoice
         return $this;
     }
 
+    public function getCCurrency(): ?CCurrency
+    {
+        return $this->c_currency;
+    }
+
+    public function setCCurrency(?CCurrency $c_currency): self
+    {
+        $this->c_currency = $c_currency;
+
+        return $this;
+    }
+
     public function getCCurrencyId(): ?int
     {
         return $this->c_currency_id;
@@ -731,6 +755,18 @@ class CInvoice
     public function setGrandtotal(float $grandtotal): self
     {
         $this->grandtotal = $grandtotal;
+
+        return $this;
+    }
+
+    public function getMPricelist(): ?MPricelist
+    {
+        return $this->m_pricelist;
+    }
+
+    public function setMPricelist(?MPricelist $m_pricelist): self
+    {
+        $this->m_pricelist = $m_pricelist;
 
         return $this;
     }
