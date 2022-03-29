@@ -74,11 +74,17 @@ class CBpartner
      */
     private $c_invoices;
 
+    /**
+     * @ORM\OneToMany(targetEntity=MInout::class, mappedBy="c_bpartner")
+     */
+    private $m_inouts;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->c_bpartner_location = new ArrayCollection();
         $this->c_invoices = new ArrayCollection();
+        $this->m_inouts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -278,6 +284,36 @@ class CBpartner
             // set the owning side to null (unless already changed)
             if ($cInvoice->getCBpartner() === $this) {
                 $cInvoice->setCBpartner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|MInout[]
+     */
+    public function getMInouts(): Collection
+    {
+        return $this->m_inouts;
+    }
+
+    public function addMInout(MInout $mInout): self
+    {
+        if (!$this->m_inouts->contains($mInout)) {
+            $this->m_inouts[] = $mInout;
+            $mInout->setCBpartner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMInout(MInout $mInout): self
+    {
+        if ($this->m_inouts->removeElement($mInout)) {
+            // set the owning side to null (unless already changed)
+            if ($mInout->getCBpartner() === $this) {
+                $mInout->setCBpartner(null);
             }
         }
 

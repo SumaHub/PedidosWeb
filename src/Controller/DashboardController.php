@@ -6,7 +6,6 @@ use App\Entity\AdOrginfo;
 use App\Entity\COrder;
 use App\Repository\CBpartnerRepository;
 use App\Repository\MProductRepository;
-use App\Util;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;

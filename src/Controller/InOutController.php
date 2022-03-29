@@ -3,17 +3,17 @@
 namespace App\Controller;
 
 use App\Repository\CBpartnerRepository;
-use App\Repository\CInvoiceRepository;
+use App\Repository\MInoutRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-Class InvoiceController extends BaseController
+Class InOutController extends BaseController
 {
     /**
-     * Ruta para ver una lista con las facturas
-     * @Route("/facturas", name="invoices")
+     * Ruta para ver una lista con las entregas
+     * @Route("/entregas", name="shipments")
      * 
      * @param \Jaxon\AjaxBundle\Jaxon $jaxon
      * @param \Doctrine\Persistence\ManagerRegistry $manager
@@ -30,7 +30,7 @@ Class InvoiceController extends BaseController
         $user = $this->session->get('user', null);
         $organization = $this->session->get('organization', null);
 
-        $RInvoice = new CInvoiceRepository($manager);
+        $RInOut = new MInoutRepository($manager);
         $criteria = [
             'ad_org_id' => $organization->getAdOrgId(),
             'issotrx' => 'Y',
@@ -45,14 +45,14 @@ Class InvoiceController extends BaseController
         }
 
         $response->setContent(
-            $this->twig->render('modules/invoice/list.html', [
-                'title'         => 'Pedidos Web | Facturas',
+            $this->twig->render('modules/inout/list.html', [
+                'title'         => 'Pedidos Web | Entregas',
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
-                'modulo'        => 'Facturas',
+                'modulo'        => 'Entregas',
                 'user'          => $user,
                 'organization'  => $organization,
-                'invoices'      => $RInvoice->findBy(
+                'shipments'      => $RInOut->findBy(
                     $criteria, 
                     ['dateacct' => 'desc'],
                     100
@@ -67,13 +67,13 @@ Class InvoiceController extends BaseController
     }
 
     /**
-     * Ruta para ver una factura
-     * @Route("/factura/{documentno}/{id}", name="invoice_view")
+     * Ruta para ver una entrega
+     * @Route("/entrega/{documentno}/{id}", name="shipment_view")
      * 
      * @param \Jaxon\AjaxBundle\Jaxon $jaxon 
      * @param \Doctrine\Persistence\ManagerRegistry $manager
      * @param string $documentno Nro del documento
-     * @param string $id Identificador de la factura
+     * @param string $id Identificador de la entrega
      * 
      * @return \Symfony\Component\HttpFoundation\Response Vista
      */
@@ -87,17 +87,17 @@ Class InvoiceController extends BaseController
         $user = $this->session->get('user', null);
         $organization = $this->session->get('organization', null);
 
-        $RInvoice = new CInvoiceRepository($manager);
+        $RInOut = new MInoutRepository($manager);
         $response->setContent(
-            $this->twig->render('modules/invoice/view.html', [
-                'title'         => 'Pedidos Web | Factura | ' . $documentno,
+            $this->twig->render('modules/inout/view.html', [
+                'title'         => 'Pedidos Web | Entrega | ' . $documentno,
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
-                'modulo'        => 'Facturas',
+                'modulo'        => 'Entregas',
                 'breadcrumb'    => $documentno,
                 'user'          => $user,
                 'organization'  => $organization,
-                'invoice'       => $RInvoice->find( base64_decode($id) ),
+                'shipmet'       => $RInOut->find( base64_decode($id) ),
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script()
