@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Model\Product as ModelProduct;
 use App\Repository\AdOrginfoRepository;
 use App\Repository\MProductRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -12,48 +11,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends BaseController
 {
-    public $targetDir;
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->targetDir = "/assets/img/product";
-    }
-
-    /**
-     * Ruta para ver todos los productos
-     * @Route("/producto/imagen/{codigo}", name="productos")
-     * 
-     * @param string $codigo Codigo del producto
-     *
-     * @return \Symfony\Component\HttpFoundation\Response Vista
-     */
-    public function add_image(String $codigo): Response
-    {
-        if ( !$this->VerifySession() ) 
-            return $this->logout();
-
-        $image      = new ImageController($this->targetDir);
-        $product    = new ModelProduct();
-
-        $image->upload($_FILES, $codigo);
-
-        if( $image->code ) 
-            $product->add_image($codigo, $image->name, $this->targetDir);
-        
-        if( !$product->code ) 
-            $image->delete($codigo . '/' . $image->name);
-
-        $response = new Response(
-            "{response: '". var_dump($product->code) ."', msj: '". $product->msj ."'}",
-            $product->code ? Response::HTTP_ACCEPTED : Response::HTTP_NOT_ACCEPTABLE,
-            ['Content-Type', 'application/json']
-        );
-
-        return $response;
-    }
-
     /**
      * Ruta para ver todos los productos
      * @Route("/productos", name="productos")
