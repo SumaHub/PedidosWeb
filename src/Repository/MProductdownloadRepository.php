@@ -14,8 +14,15 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MProductdownloadRepository extends ServiceEntityRepository
 {
+    public $sequence;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MProductdownload::class);
+
+        /** Table Sequence */
+        $RSequence = new AdSequenceRepository($registry);
+        $this->sequence = $RSequence->findBy(['name' => $this->getClassMetadata()->getTableName()]);
+        $this->sequence = $this->sequence[0];
     }
 }

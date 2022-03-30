@@ -22,7 +22,7 @@ Primero se debe agregar en la clase del Jaxon
 public function __construct(KernelInterface $kernel,
         LoggerInterface $logger, TemplateEngine $template, array $config)
 ```
-el parametro de ManagerRegistre
+el parametro de ManagerRegistry
 ```php
 public function __construct(KernelInterface $kernel,
         LoggerInterface $logger, TemplateEngine $template, ManagerRegistry $manager, array $config)

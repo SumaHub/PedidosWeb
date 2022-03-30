@@ -1,21 +1,3 @@
-imagen_subir:
-  path: /producto/imagen/{codigo}
-  controller: App\Controller\ProductController::add_image
-
-# Facturas
-facturas:
-  path: /facturas
-  controller: App\Controller\InvoiceController::pdfAction
-
-analisis_vencimiento:
-  path: /analisis-de-vencimiento
-  controller: App\Controller\InvoiceController::getOpen
-
 # Jaxon Request URI
 jaxon:
   resource: "@JaxonAjaxBundle/Resources/config/routes.yaml"
-
-# Pedidos
-pedido_temp:
-  path: /pedido/temp/{documentno}
-  controller: App\Controller\OrderController::edit

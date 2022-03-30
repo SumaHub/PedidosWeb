@@ -20,6 +20,11 @@ class MProductdownload
     /**
      * @ORM\Column(type="integer")
      */
+    private $ad_client_id;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
     private $ad_org_id;
 
     /**
@@ -38,8 +43,18 @@ class MProductdownload
     private $createdby;
 
     /**
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $updatedby;
+
+    /**
      * @ORM\ManyToOne(targetEntity=MProduct::class, inversedBy="m_productdownload")
-     * @ORM\JoinColumn(referencedColumnName="m_product_id", nullable=false)
+     * @ORM\JoinColumn(referencedColumnName="m_product_id")
      */
     private $m_product;
 
@@ -49,14 +64,19 @@ class MProductdownload
     private $m_product_id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=60)
      */
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=120)
      */
     private $downloadurl;
+
+    /**
+     * @ORM\Column(type="string", length=36)
+     */
+    private $m_productdownload_uu;
 
     public function getId(): ?int
     {
@@ -71,6 +91,18 @@ class MProductdownload
     public function setMProductdownloadId(int $m_productdownload_id): self
     {
         $this->m_productdownload_id = $m_productdownload_id;
+
+        return $this;
+    }
+
+    public function getAdClientId(): ?int
+    {
+        return $this->ad_client_id;
+    }
+
+    public function setAdClientId(int $ad_client_id): self
+    {
+        $this->ad_client_id = $ad_client_id;
 
         return $this;
     }
@@ -123,6 +155,30 @@ class MProductdownload
         return $this;
     }
 
+    public function getUpdated(): ?\DateTimeInterface
+    {
+        return $this->updated;
+    }
+
+    public function setUpdated(\DateTimeInterface $updated): self
+    {
+        $this->updated = $updated;
+
+        return $this;
+    }
+
+    public function getUpdatedby(): ?int
+    {
+        return $this->updatedby;
+    }
+
+    public function setUpdatedby(int $updatedby): self
+    {
+        $this->updatedby = $updatedby;
+
+        return $this;
+    }
+
     public function getMProduct(): ?MProduct
     {
         return $this->m_product;
@@ -167,6 +223,18 @@ class MProductdownload
     public function setDownloadurl(string $downloadurl): self
     {
         $this->downloadurl = $downloadurl;
+
+        return $this;
+    }
+
+    public function getMProductdownloadUu(): ?string
+    {
+        return $this->m_productdownload_uu;
+    }
+
+    public function setMProductdownloadUu(string $m_productdownload_uu): self
+    {
+        $this->m_productdownload_uu = $m_productdownload_uu;
 
         return $this;
     }
