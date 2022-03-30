@@ -13,7 +13,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ProductController extends BaseController
+class ProductdownloadController extends BaseController
 {
     public $code = false;
 
