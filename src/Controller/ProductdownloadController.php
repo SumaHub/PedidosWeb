@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 use App\Constant;
-use App\Entity\MProduct;
 use App\Entity\MProductdownload;
-use App\Model\Product as ModelProduct;
 use App\Repository\AdSequenceRepository;
 use App\Repository\MProductdownloadRepository;
 use App\Repository\MProductRepository;
@@ -35,7 +33,7 @@ class ProductdownloadController extends BaseController
 
     /**
      * Ruta para agregar imagen al producto
-     * @Route("/producto/imagen/{codigo}", name="create")
+     * @Route("/producto/imagen/add/{codigo}", name="create_image")
      * 
      * @param string $codigo Codigo del producto
      * @param ManagerRegistry $manager Doctrine Manager
@@ -49,7 +47,6 @@ class ProductdownloadController extends BaseController
         
         $user = $this->session->get('user', null);
 
-        $product    = new ModelProduct();
         $this->upload($_FILES, $codigo);
 
         if( $this->code ) {
@@ -69,21 +66,20 @@ class ProductdownloadController extends BaseController
                 ->setCreatedby( $user->getId() )
                 ->setUpdated( $date )
                 ->setUpdatedby( $user->getId() )
+                ->setMProduct( $product )
                 ->setMProductId( $product->getId() )
-                ->setDownloadurl( 'http://pedido.sumagroups.com/' . $this->publicDir . $codigo . $this->name)
+                ->setName( $this->name )
+                ->setDownloadurl( 'http://pedido.sumagroups.com/' . $this->publicDir . $codigo . '/' . $this->name)
                 ->setMProductdownloadUu( $RSequence->findNextUU() );
 
-            $manager = $manager->getManagerForClass(MProduct::class);
+            $manager = $manager->getManagerForClass(MProductdownload::class);
             $manager->persist($Productdownload);
             $manager->flush();
         }
 
-        if( $product->getId() > 0 ) 
-            $this->delete($codigo . '/' . $this->name);
-
         $response = new Response(
-            "{response: '". $product->getId() ."'}",
-            $product->getId() > 0 ? Response::HTTP_ACCEPTED : Response::HTTP_NOT_ACCEPTABLE,
+            "{id: '". $Productdownload->getId() ."'}",
+            $Productdownload->getId() > 0 ? Response::HTTP_ACCEPTED : Response::HTTP_NOT_ACCEPTABLE,
             ['Content-Type', 'application/json']
         );
 
@@ -99,7 +95,36 @@ class ProductdownloadController extends BaseController
         return $folder;
     }
 
-    public function delete(String $file) { return !is_file($this->targetDir . $file) ?: unlink($this->targetDir . $file) ; }
+    /**
+     * Ruta para eliminar imagen del producto
+     * @Route("/producto/imagen/delete/{productdownload_id}", name="delete_image")
+     * 
+     * @param int $id Identificador del registro
+     * @param ManagerRegistry $manager Doctrine Manager
+     */
+    public function delete(Int $id, ManagerRegistry $manager) 
+    { 
+        if ( !$this->VerifySession() ) 
+            return $this->logout();
+        
+        $user = $this->session->get('user', null);
+
+        $RProductdownload = new MProductdownloadRepository($manager);
+        $Productdownload = $RProductdownload->find( $id );
+        $Productdownload->setIsactive( 'N' );
+
+        $manager = $manager->getManagerForClass(MProductdownload::class);
+        $manager->persist($Productdownload);
+        $manager->flush();
+
+        $response = new Response(
+            "{id: '". $Productdownload->getId() ."'}",
+            $Productdownload->getId() > 0 ? Response::HTTP_ACCEPTED : Response::HTTP_NOT_ACCEPTABLE,
+            ['Content-Type', 'application/json']
+        );
+
+        return true; 
+    }
 
     public function upload(Array $file, String $folder)
     {

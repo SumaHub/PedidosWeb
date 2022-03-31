@@ -210,7 +210,7 @@
         previewNode.parentNode.removeChild(previewNode)
 
         var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
-            url: "/producto/imagen/{{ product.value }}", // Set the url
+            url: "/producto/imagen/add/{{ product.value }}", // Set the url
             thumbnailWidth: 80,
             thumbnailHeight: 80,
             parallelUploads: 5,

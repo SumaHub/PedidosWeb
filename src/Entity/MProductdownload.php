@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=MProductdownloadRepository::class)
- * @ORM\Table(name="m_productdownload")
+ * @ORM\Table(name="M_ProductDownload")
  */
 class MProductdownload
 {
