@@ -12,53 +12,6 @@ class Product
 
     public $msj = false;
 
-    public function add_image(
-        String $codigo = '',
-        String $name = '',
-        String $patch = ''
-    )
-    {
-        $db = DBController::conectar();
-
-        if ($db->IsConnected()) {
-            // Begin transaction
-            $db->BeginTrans();
-
-            // Get empty recordset
-            $record = $db->Execute("SELECT * FROM M_ProductDownload WHERE M_ProductDownload_ID = -1");
-
-            // Default Values
-            $date = $db->GetOne("SELECT current_timestamp");
-
-            // Build an array with image data 
-            $image = array(
-                "M_ProductDownload_ID"  => $db->GetOne("SELECT nextid(1111, 'N')"),
-                "AD_Client_ID"          => 1000001,
-                "AD_Org_ID"             => 0,
-                "IsActive"              => 'Y',
-                "Created"               => $date,
-                "CreatedBy"             => $_SESSION['user']['ad_user_id'],
-                "Updated"               => $date,
-                "UpdatedBy"             => $_SESSION['user']['ad_user_id'],
-                "M_Product_ID"          => $db->GetOne("SELECT M_Product_ID FROM M_Product WHERE Value = '{$codigo}'"),
-                "Name"                  => $name,
-                "DownloadURL"           => 'http://pedido.sumagroups.com' . $patch . '/' . $codigo . '/' . $name,
-                "M_ProductDownload_UU"  => $db->GetOne("SELECT uuid_generate_v4()")
-            );
-
-            // Generate and execute SQL query
-            $this->code = ( $db->Execute( $db->GetInsertSQL($record, $image) ) ) ? $db->CommitTrans() : $db->RollbackTrans();
-            
-            // Verify the transaction status
-            $this->msj  = $this->code ? null : $db->ErrorMsg();
-
-        } else {
-            $this->msj = $db->ErrorMsg();
-        }
-
-        $db->Close();
-    }
-
     public function delete_image(
         String $image = ''
     )

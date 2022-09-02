@@ -1,0 +1,582 @@
+{% extends "modules/dashboard.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-searchbuilder-bs4/css/searchBuilder.bootstrap4.min.css">
+{% endblock %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <form id="requisition">
+                        <div class="card card-outline card-info">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="organization">Organizaci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-building"></i>
+                                                    </span>
+                                                </div>
+                                                <select id="organization" name="organization" class="form-control" required>
+                                                    {% if organization.getId > 0%}
+                                                         <option value="{{ organization.getId }}">{{ organization.getName }}</option>
+                                                    {% else %}
+                                                         <option value="0">-- Seleccione una Opci&oacute;n --</option>
+                                                         {% for org in organization %}
+                                                             <option value="{{ org.getId }}">{{ org.getName }}</option>
+                                                         {% endfor %}
+                                                     {% endif %}
+                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="bpartner">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="bpartner" name="bpartner" type="text" class="form-control" value="{{ requisition.getCBpartner.getName }}" onkeyup="if(event.keyCode == 13){ $('#setBpartner').click(); }" placeholder="Nombre o RIF" required>
+                                                <input id="bpartner_id" name="bpartner_id" type="hidden" value="{{ requisition.getCBpartnerId }}">
+                                                <div class="input-group-prepend">
+                                                    <button id="setBpartner" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                    <button class="btn btn-warning btn-flat" type="button" data-toggle="modal" data-target="#bpartnerModal">
+                                                        <i class="fas fa-binoculars"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documenttype">Tipo de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-file-invoice"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="documenttype" id="documenttype" class="form-control" readonly="true">
+                                                    <option value="{{ requisition.getCDoctypeId }}" checked="true">{{ requisition.getCDoctype.getName }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documentno">Nro de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="documentno" type="text" value="{{ requisition.getDocumentno }}" class="form-control" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="document">Vendedor</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="salesrep" name="salesrep"type="text" class="form-control" value="{{ salesrep.getName }}" onkeyup="if(event.keyCode == 13){ $('#setSalesrep').click(); }" placeholder="Nombre" required readonly>
+                                                <input id="salesrep_id" name="salesrep_id" type="hidden" value="{{ salesrep.getId }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 d-flex align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="documentint" id="documentint" {% if requisition.getSmDocumentInt == 'Y' %} checked {% endif %} >
+                                            <label class="form-check-label" for="exampleRadios1">Es un Documento Interno?</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="description">Descripci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <textarea name="description" id="description" class="form-control" rows="2">{{ requisition.getDescription }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="address">Direcci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-map"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="address" id="address" class="form-control" value="{{ requisition.getCBpartnerLocation.getCLocation.getAddress1 }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="phone">Tel&eacute;fono</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-phone"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="phone" type="text" class="form-control" value="{{ requisition.getCBpartnerLocation.getPhone }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row w-100"> 
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label for="pricelist">Lista de Precio</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">
+                                                            <i class="fas fa-clipboard-list"></i>
+                                                        </span>
+                                                    </div>
+                                                    <select name="pricelist" id="pricelist" class="form-control" required>
+                                                        <option value="{{ requisition.getMPricelist.getId }}" selected>{{ requisition.getMPricelist.getName }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="document">Almac&eacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <select id="warehouse" name="warehouse" class="form-control" required>
+                                                    <option value="{{ warehouse.getId }}">{{ warehouse.getName }}</option>
+                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="termino">T&eacute;rmino de Pago</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-hand-holding-usd"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="paymentterm" id="paymentterm" class="form-control" readonly>
+                                                    <option value="{{ requisition.getCPaymentterm.getId }}">{{ requisition.getCPaymentterm.getName }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Imagen</th>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">C&oacute;digo</th>
+                                        <th class="text-center">Precio</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos"> 
+                                    {% for line in requisitionlines %}
+                                    <tr class="text-center line" id="{{ line.getId|base64 }}">
+                                        <td class="text-center">{{ line.getLine }}</td>
+                                        
+                                        {% set img = line.getMProduct.getMProductdownload %}
+                                        {% if img|length > 0 %}
+                                            {% set url = img[0].getDownloadurl %}
+                                        {% else %}
+                                            {% set url = '/assets/img/default-150x150.png' %}
+                                        {% endif %}
+                                        <td class="text-center">
+                                            <a href="{{ url }}" data-toggle="lightbox" data-title="{{ line.getMProduct.getValue }}">
+                                                <img src="{{ url }}" alt="{{ line.getMProduct.getValue }}" width="50">
+                                            </a>
+                                        </td>
+
+                                        <td class="text-left">  {{ line.getMProduct.getName }}</td>
+                                        <td class="text-center">{{ line.getMProduct.getValue }}</td>
+
+                                        <td class="text-right prc" id="{{ (line.getId ~ 'prc')|base64 }}">
+                                            <p onclick="App.Jaxon.Requisitionline.changePrc('{{ line.getId|base64 }}')">{{ number_format(line.getPricelist, 2) }}</p>
+                                        </td>
+                                        
+                                        <td class="text-right qty" id="{{ (line.getId ~ 'qty')|base64 }}">
+                                            <p onclick="App.Jaxon.Requisitionline.changeQty('{{ line.getId|base64 }}')">{{ number_format(line.getQty, 2) }}</p>
+                                        </td>
+
+                                        <td class="text-right amt" id="{{ (line.getId ~ 'amt')|base64 }}">
+                                            {{ number_format(line.getLinenetamt, 2) }}
+                                        </td>
+                                        
+                                        <td class="btn-action">
+                                            <i onclick="App.Jaxon.Base.actionConfirm('Requisitionline', 'delete', '{{ line.getId|base64 }}')" class="fas fa-trash text-danger"></i>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    {% if requisition.getDocstatus == 'DR' %}
+                                        <tr id="cleanline">
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">
+                                                <input id="product_1" type="text" placeholder="XXXX000001">
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td><button class="btn btn-info float-right" data-toggle="modal" data-target="#productModal"><i class="fas fa-plus"></i> Agregar Producto</button></td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="docstatus">Estatus del Documento</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-receipt"></i>
+                                                </span>
+                                            </div>
+                                            {% if requisition.getDocstatus|lower == 'dr' %}
+                                                {% set estatus = 'Borrador' %}
+                                            {% elseif requisition.getDocstatus|lower == 'ip' %}
+                                                {% set estatus = 'En Progreso' %}
+                                            {% elseif requisition.getDocstatus|lower == 'ap' %}
+                                                {% set estatus = 'Aprobado' %}
+                                            {% elseif requisition.getDocstatus|lower == 'co' %} 
+                                                {% set estatus = 'Completo' %}
+                                            {% elseif requisition.getDocstatus|lower == 'cl' %}
+                                                {% set estatus = 'Cerrado' %}
+                                            {% elseif requisition.getDocstatus|lower == 'in' %}
+                                                {% set estatus = 'No V&aacute;lido' %}
+                                            {% elseif requisition.getDocstatus|lower == 'vo' %}
+                                                {% set estatus = 'Anulado' %}
+                                            {% else %}
+                                                {% set estatus = 'Desconocido' %}
+                                            {% endif %}
+                                            <input id="docstatus" type="text" value="{{ estatus }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="totallines">Total</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                </span>
+                                            </div>
+                                            <input id="totallines" type="text" value="{{ number_format(requisition.getTotallines, 2) }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+            <div id="actions" class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                {% if requisition.getDocstatus != 'AP' %}
+                                    <button id="cancel" class="mx-1 btn btn-lg btn-danger"><i class="fas fa-cog pr-2"></i>Anular</button>
+                                {% endif %}
+
+                                {% if requisition.getDocaction == 'PR' %}
+                                    {% set accion, flag = 'Preparar', 'info' %}
+                                {% elseif requisition.getDocaction == 'AP' %}
+                                    {% set accion, flag = 'Aprovar', 'success' %}
+                                {% elseif requisition.getDocaction == 'CO' %}
+                                    {% set accion, flag = 'Completar', 'success' %}
+                                {% elseif requisition.getDocaction == 'CL' %}
+                                    {% set accion, flag = 'Cerrar', 'warning' %}
+                                {% else %}
+                                    {% set accion, flag = 'Desconocido', 'warning' %}
+                                {% endif %}
+                                <button id="process" class="mx-1 btn btn-lg btn-{{ flag }}"><i class="fas fa-cog pr-2"></i>{{ accion }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal fade" id="bpartnerModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Cliente</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#getBpartners').click();">
+                                        <div class="form-group">
+                                            <label for="bpartner_value">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="bpartner_value" type="text" class="form-control" placeholder="Nombre o RIF">
+                                                <div class="input-group-prepend">
+                                                    <button id="getBpartners" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bpartners" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SalesRep Modal -->
+    <div class="modal fade" id="salesrepModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Vendedor</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#getSalesreps').click();">
+                                        <div class="form-group">
+                                            <label for="salesrep_value">Representante Comercial</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="salesrep_value" type="text" class="form-control" placeholder="Nombre">
+                                                <div class="input-group-prepend">
+                                                    <button id="getSalesreps" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="salesreps" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Producto</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#getProducts').click();">
+                                        <div class="form-group">
+                                            <label for="product_value">Producto</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-boxes"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="product_value" type="text" class="form-control" placeholder="Nombre, C&oacute;digo o SKU">
+                                                <div class="input-group-prepend">
+                                                    <button id="getProducts" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="products" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script src="/node_modules/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="/node_modules/jszip/dist/jszip.min.js"></script>
+    <script src="/node_modules/pdfmake/build/pdfmake.min.js"></script>
+    <script src="/node_modules/pdfmake/build/vfs_fonts.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder/js/dataTables.searchBuilder.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder-bs4/js/searchBuilder.bootstrap4.min.js"></script>
+    
+    <script src="/node_modules/ekko-lightbox/dist/ekko-lightbox.min.js"></script>
+    <script>
+        $(function() {
+            $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+                event.preventDefault();
+                $(this).ekkoLightbox({
+                    alwaysShowClose: true
+                });
+            });
+        })
+    </script>
+{% endblock %}
+
+{% block scripts %}
+    <script>App.Jaxon.Requisition.init('{{ requisition.getId|base64 }}');</script>
+    
+    <script>
+        function anular(requisition_id) {
+            Swal.fire({
+                title: 'Desea borrar esta plantilla?',
+                text: 'La plantilla de venta sera deshabilitada!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Borrar!',
+                confirmButtonColor: '#d33',
+                cancelButtonText: `Cancelar`,
+            }).then((result) => {
+                App.Jaxon.Requisition.delete(requisition_id);
+            })
+        }
+
+        function aprobar(requisition_id) {
+            Swal.fire({
+                title: 'Desea procesar esta plantilla?',
+                text: 'La plantilla de venta sera enviada al flujo de aprobacion!',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Enviar!',
+                confirmButtonColor: '#28a745',
+                cancelButtonText: `Cancelar`,
+                cancelButtonColor: '#d33',
+            }).then((result) => {
+                $.ajax({
+                    url: "/plantilla/process/" + requisition_id,
+                    contentType: 'json'
+                }).done( function( data ) { 
+                    if (data.msg != 'Suspended') {
+                        Swal.fire({
+                            title: 'Oops!',
+                            text: data.msg,
+                            icon: 'warning'
+                        })
+                    } else {
+                        Swal.fire({
+                            title: 'Excelente!',
+                            text: 'Su plantilla fue enviada exitosamente al flujo de aprobacion',
+                            icon: 'success'
+                        });
+                        App.Jaxon.Requisition.clear();
+                        setTimeout(() => {
+                            window.location.replace('/plantilla/' + requisition_id);
+                        }, '3000');
+                    }
+                });
+
+            })
+        }
+    </script>
+{% endblock %}

@@ -39,11 +39,41 @@ class Base extends \Jaxon\CallableClass
                 "error"     => "Ha ocurrido un error!"
             ]
         ],
-        "OrderLine" => [
+        "Orderline" => [
             "delete" => [
                 // Ask Swal
                 "title"             => "Deseas borrar esta linea?",
                 "text"              => "La linea de la orden sera eliminada.",
+                "icon"              => "warning",
+                "confirmButtonText" => "Borrar!",
+                "confirmButtonColor"=> "#d33",
+                "cancelButtonColor" => "#2f2f2f",
+    
+                // Result Swal
+                "success"   => "Linea Borrada!",
+                "error"     => "Ha ocurrido un error!"
+            ]
+        ],
+        "Requisition"     =>  [
+            "delete"    => [
+                // Ask Swal
+                "title"             => "Deseas borrar esta plantilla?",
+                "text"              => "Los datos de la plantilla no podran ser recuperados posteriormente.",
+                "icon"              => "warning",
+                "confirmButtonText" => "Borrar!",
+                "confirmButtonColor"=> "#d33",
+                "cancelButtonColor" => "#2f2f2f",
+
+                // Result Swal
+                "success"   => "Plantilla Borrado!",
+                "error"     => "Ha ocurrido un error!"
+            ]
+        ],
+        "Requisitionline" => [
+            "delete" => [
+                // Ask Swal
+                "title"             => "Deseas borrar esta linea?",
+                "text"              => "La linea de la plantilla sera eliminada.",
                 "icon"              => "warning",
                 "confirmButtonText" => "Borrar!",
                 "confirmButtonColor"=> "#d33",
@@ -74,7 +104,7 @@ class Base extends \Jaxon\CallableClass
     public function actionConfirm(
         String $controller,
         String $action,
-        Int $id
+        String $id
     )
     {
         $jxnr = new Response;
@@ -92,7 +122,7 @@ class Base extends \Jaxon\CallableClass
                     cancelButtonColor: '". $data['cancelButtonColor'] ."',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        App.Jaxon.". $controller .".". $action ."(". $id .");
+                        App.Jaxon.". $controller .".". $action ."('". $id ."');
                     }
                   })"
             );

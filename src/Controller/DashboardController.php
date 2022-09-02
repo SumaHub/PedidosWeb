@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\AdOrginfo;
-use App\Entity\COrder;
-use App\Repository\CBpartnerRepository;
-use App\Repository\MProductRepository;
+use App\Repository\Main\AdOrginfoRepository;
+use App\Repository\Main\CBpartnerRepository;
+use App\Repository\Main\MProductRepository;
+use App\Repository\Main\MRequisitionRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,52 +28,48 @@ class DashboardController extends BaseController
         if( !$this->VerifySession() ) 
             return $this->logout();
 
-        $response = new Response();
         $session = new Session();
-
         $organization = $session->get('organization', null);
-        $organizationInfo = $manager->getRepository(AdOrginfo::class)->findBy(
-            ['ad_org_id' => $organization->getAdOrgId()],
-            null,
-            1
-        );
-        $order = $manager->getRepository(COrder::class);
-        $bpartner = new CBpartnerRepository($manager);
+
+        $ROrganizationinfo = new AdOrginfoRepository($manager);
+        $RRequisition = new MRequisitionRepository($manager);
+        $RBpartner = new CBpartnerRepository($manager);
         $product = new MProductRepository($manager);
 
         /** Criteria */
         $criteria_so = [
             'ad_org_id' => $organization->getAdOrgId(),
-            'issotrx' => 'Y',
+            'isquatation' => 'Y',
             'isactive' => 'Y'
         ];
-        $criteria_bp = [
-            'isactive' => 'Y',
-            'iscustomer' => 'Y',
-            'ismatriz' => 'N',
-            'issummary' => 'N'
-        ];
+
+        $orginfo = $ROrganizationinfo->findOneBy(['ad_org_id' => $organization->getAdOrgId()]);
         $criteria_p = [
-            'sm_marca_id' => $organizationInfo[0]->getSmMarcaId(),
+            'sm_marca_id' => $orginfo->getSmMarcaId(),
             'issold' => 'Y',
             'isactive' => 'Y'
         ];
 
         $user = $session->get('user', null);
-        if ( $user->getCBpartnerId() && $bpartner->find($user->getCBpartnerId())->getIssalesrep() ) {
-            $criteria_so['salesrep_id'] = $user->getId();
+        if ( $user->getCBpartnerId() && $RBpartner->find($user->getCBpartnerId())->getIssalesrep() ) {
+            $criteria_so['createdby'] = $user->getId();
 
             // Buscar terceros asignados
-            $bpartner = $bpartner->findBy(
-                ['c_bpartner_id' => $bpartner->findBySalesRep($user->getId())]
+            $bpartner = $RBpartner->findBy(
+                ['c_bpartner_id' => $RBpartner->findBySalesRep($user->getId())]
             );
         } else {
-            $bpartner = $bpartner->findBy( $criteria_bp );
+            $bpartner = $RBpartner->findBy([
+                'isactive' => 'Y',
+                'iscustomer' => 'Y',
+                'ismatriz' => 'N',
+                'issummary' => 'N'
+            ]);
         }
 
         /** Response */
-        $response->setContent(
-            $this->twig->render('modules/dashboard.html', [
+        return new Response(
+            $this->twig->render('modules/dashboard.html.twig', [
                 'title'         => 'Pedidos Web | Dashboard',
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
@@ -81,13 +77,21 @@ class DashboardController extends BaseController
                 'user'          => $user,
                 'organization'  => $organization,
                 'stats'         => [
-                    "orders"            => $order->findBy( $criteria_so, ['dateordered' => 'desc'], 5 ),
-                    "ordersInDraft"     => $order->findBy( $criteria_so, ['dateordered' => 'desc'], 5 ),
-                    "orderQty"          => count($order->findBy( $criteria_so )),
-                    "orderToApproveQty" => count($order->findBy( array_merge($criteria_so, [ 'docstatus' => 'AP' ]) )),
+                    "requisitions"      => $RRequisition->findBy(  
+                        array_merge( $criteria_so, ['docstatus' => ['CO', 'AP', 'IP', 'CL']] ), 
+                        ['datedoc' => 'desc'], 
+                        5 
+                    ),
+                    "requisitionsInDraft"   => $RRequisition->findBy( 
+                        array_merge( $criteria_so, ['docstatus' => 'DR'] ), 
+                        ['datedoc' => 'desc'], 
+                        5 
+                    ),
+                    "orderQty"          => count($RRequisition->findBy( $criteria_so )),
+                    "orderToApproveQty" => count($RRequisition->findBy( array_merge($criteria_so, [ 'docstatus' => 'AP' ]) )),
                     "bpartnerQty"       => count($bpartner),
                     "products"          => $product->findBy( $criteria_p, null, 5 ),
-                    "productsFeatured"  => $product->findFeaturedProduct($organization->getId(), 5),
+                    "productsFeatured"  => $product->findFeaturedProduct($orginfo->getSmMarcaId(), 5),
                     "productQty"        => count($product->findBy( $criteria_p ))
                 ],
                 'jaxonCss'      => $jaxon->css(),
@@ -95,8 +99,6 @@ class DashboardController extends BaseController
                 'jaxonScript'   => $jaxon->script(),
             ])
         );
-        
-        return $response;
     }
 }
 

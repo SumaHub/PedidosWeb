@@ -1,0 +1,149 @@
+{% extends "modules/dashboard.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row pb-4">
+                <div class="col-12 col-sm-6">
+                    <h3 class="d-inline-block d-sm-none">{{ product.getName }}</h3>
+                    <div class="col-12">
+                        {% if product.getMProductdownload|length > 0 %}
+                        <img class="card-img-top" src="{{ product.getMProductdownload[0].getDownloadurl }}" onerror="this.src='https://ui-avatars.com/api/?size=400&background=63686c&color=343a40&name={{ product.getMProductCategory.getName }}'" alt="{{ product.getValue }}">
+                        {% else %}
+                        <img class="card-img-top" src="https://ui-avatars.com/api/?size=400&background=63686c&color=343a40&name={{ product.getMProductCategory.getName }}" alt="{{ product.getValue }}">
+                        {% endif %}
+                    </div>
+                    <div class="col-12 product-image-thumbs">
+                        {% for image in product.getMProductdownload %}
+                        <div class="product-image-thumb {% if image.getId == product.getMProductdownload[0].getId %} selected {% endif %}">
+                            <img src="{{ image.getDownloadurl }}" class="w-100" alt="{{ product.getValue }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="co-12 col-sm-6">
+                    <h3 class="my-3">{{ product.getName }}</h3>
+                    <p>{{ product.getDescription }}</p>
+                    <hr>
+                    <p><strong>Categor&iacute;a:</strong> {{ product.getMProductCategory.getName }}</p>
+                    <p><strong>C&oacute;digo:</strong> {{ product.getValue }}</p>
+                    <p><strong>SKU:</strong> {{ product.getSku }}</p>
+                    <p><strong>Modelo:</strong> {{ product.getSmModeloProducto.getName  }}</p>
+                    <div class="btn-group">
+                        <button id="addToCart">
+                            <i class="fa fa-cart-plus"></i>
+                            A&Ntilde;ADIR
+                        </button>
+                        <button id="priceList">
+                            $ 120,00
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script>
+        $(function () {
+            $('.card .delete').on('click', function() {
+                Swal.fire({
+                    title: "Esta seguro de eliminar esta imagen",
+                    html: "Esta acci&oacute;n no puede ser revertida posteriormente!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "Cancelar!",
+                    confirmButtonText: "Borrar!",
+                    confirmButtonColor: "#d33"
+                }).then( (result) => {
+                    if(result.isConfirmed) {
+                        App.Jaxon.Product.delete_image(this.dataset.product, this.dataset.image)
+                    }
+                })
+            });
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            $('.btn-copy').on('click', function () { 
+                Toast.fire({ icon: 'success', title: 'Copiado!' })
+            });
+        });
+    </script>
+
+    <!-- dropzonejs -->
+    <script src="/assets/vendor/dropzone/min/dropzone.min.js"></script>
+
+    <script>
+        // DropzoneJS Demo Code Start
+        Dropzone.autoDiscover = false
+
+        // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+        var previewNode = document.querySelector("#template")
+        previewNode.id = ""
+        var previewTemplate = previewNode.parentNode.innerHTML
+        previewNode.parentNode.removeChild(previewNode)
+
+        var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+            url: "/producto/imagen/add/{{ product.value }}", // Set the url
+            thumbnailWidth: 80,
+            thumbnailHeight: 80,
+            parallelUploads: 5,
+            maxFiles: 5,
+            maxFilesize: 1,
+            previewTemplate: previewTemplate,
+            acceptedFiles: 'image/png, image/jpeg, image/webp',
+            autoQueue: false, // Make sure the files aren't queued until manually added
+            previewsContainer: "#previews", // Define the container to display the previews
+            clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+        })
+
+        myDropzone.on("addedfile", function(file) {
+            // Hookup the start button
+            file.previewElement.querySelector(".start").onclick = function() { myDropzone.enqueueFile(file) }
+        })
+
+        myDropzone.on("sending", function(file) {
+            // And disable the start button
+            file.previewElement.querySelector(".start").setAttribute("disabled", "disabled")
+        })
+
+        // Hide the total progress bar when nothing's uploading anymore
+        myDropzone.on("queuecomplete", function(progress) {
+            window.location.href = "/producto/{{ product.value }}"
+        })
+
+        // Setup the buttons for all transfers
+        // The "add files" button doesn't need to be setup because the config
+        // `clickable` has already been specified.
+        document.querySelector("#producto-imagenes .start").onclick = function() {
+            myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED))
+        }
+        document.querySelector("#producto-imagenes .cancel").onclick = function() {
+            myDropzone.removeAllFiles(true)
+        }
+        // DropzoneJS Demo Code End
+    </script>
+
+    <!-- ClipboardJS -->
+    <script src="/node_modules/clipboard/dist/clipboard.min.js"></script>
+    
+    <script>
+        new ClipboardJS('.btn-copy');
+    </script>
+{% endblock %}

@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Repository\CBpartnerRepository;
-use App\Repository\CInvoiceRepository;
+use App\Repository\Main\CBpartnerRepository;
+use App\Repository\Main\CInvoiceRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;

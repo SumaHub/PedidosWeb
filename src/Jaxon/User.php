@@ -2,9 +2,8 @@
 
 namespace App\Jaxon;
 
-use App\Entity\AdUser;
-use App\Model\User as ModelUser;
-use App\Repository\AdUserRepository;
+use App\Entity\Main\AdUser;
+use App\Repository\Main\AdUserRepository;
 use App\Util;
 use Jaxon\Response\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -31,16 +30,16 @@ class User extends Base
     /**
      * Corrobora si el usuario se encuentra registrado en la BD
      * 
-     * @param string $email Correo del usuario
+     * @param string $name Nombre del usuario
      * 
      * @return AdUser
      */
     public function exist(
-        String $email
+        String $name
     )
     {
         $RUser = new AdUserRepository($this->manager);
-        return $RUser->findBy(['email' => $email], null, 1);
+        return $RUser->findOneBy(['name' => $name]);
     }
 
     public function init()
@@ -65,21 +64,24 @@ class User extends Base
         $jxnr = new Response;
         $session = new Session();
 
-        if(empty($formData['email']) && empty($formData['password']))
+        if(empty($formData['name']) && empty($formData['password']))
             return $jxnr->alert("Introduzca datos validos!");
 
-        $user = $this->exist($formData['email']);
+        $user = $this->exist($formData['name']);
         
         if( empty($user) )
             return $jxnr->alert("Este usuario no se encuentra registrado");
 
-        if( !$user[0]->getIsactive() || $user[0]->getIslocked() )
+        if( !$user->getIsactive() || $user->getIslocked() )
             return $jxnr->alert("El usuario esta inactivo o bloqueado");
         
-        if( !self::auth($user[0], $formData['password']) )
+        if( !self::auth($user, $formData['password']) )
             return $jxnr->alert("Las credenciales no coinciden");
 
-        $session->set('user', $user[0]);
+        if( is_null($user->getCBpartner()) || !$user->getCBpartner()->getIssalesrep() )
+            return $jxnr->alert("Lo sentimos, esta plataforma es solo para vendedores");
+
+        $session->set('user', $user);
         $jxnr->redirect("/organizacion");
 
         return $jxnr;
@@ -98,21 +100,6 @@ class User extends Base
         $session->invalidate();
         $jxnr->redirect('/');
         return $jxnr;
-    }
-
-    /**
-     * Obten usuarios por rol
-     * 
-     * @param int $AD_Rol_ID Identificador del rol
-     * 
-     * @return string|ADORecordSet Mensaje de error | Dato de los usuarios
-     */
-    public function getByRole(
-        Int $AD_Role_ID = 0
-    )
-    {
-        $user = new ModelUser;
-        return $user->get_by_role($AD_Role_ID);
     }
 }
 

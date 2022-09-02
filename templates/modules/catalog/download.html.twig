@@ -1,0 +1,236 @@
+{% extends "base.html.twig" %}
+
+{% set patch = '/home/' ~ home_path ~ '/pedido.sumagroups.com/public' %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{ patch }}/assets/css/adminlte.css">
+    <!-- Datatable -->
+    <link rel="stylesheet" href="{{ patch }}/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ patch }}/assets/vendor/fontawesome-free/css/all.min.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+{% endblock %}
+
+{% block wrapper %}
+<style>
+    body {
+        display: flex; 
+        justify-content: center;
+        color: #fff;
+    }
+
+    .catalog {
+        position: relative;
+        background-color: #2f2f2f;
+        width: 437mm;
+    }
+
+    .pages {
+        page-break-before: always;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        height: 380mm;
+        width: 100%;
+        margin: 0;
+        padding: 10mm 0 10mm;
+        z-index: 1;
+    }
+
+    /* .category::after {
+        content: "";
+        position: absolute;
+        background: url('/assets/img/textura.png') center no-repeat;
+        background-size: cover;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 380mm;
+        opacity: 0.5;
+    }
+    .category .title, 
+    .category .brand {
+        position: absolute;
+        width: auto;
+    }
+    .category .title {
+        translate: calc(397px - 50%) calc(561.25px - 100%) 0;
+        padding: 0;
+    }
+    .category .title::after {
+        content: "";
+        position: absolute;
+        background-color: #2f2f2f;
+        height: 3px;
+        width: 397px;
+        left: calc(-397px + 50%);
+        bottom: 0;
+    }
+    .category .title h2 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+    .category .brand {
+        translate: calc(397px - 50%) calc(1122.5px - 100%) 0;
+    } */
+
+
+    .product .title {
+        text-align: center;
+    }
+    .product .title p {
+        font-size: 5mm;
+        font-weight: 500;
+    }
+    .product #cover {
+        position: relative;
+        height: 40%;
+        z-index: 2;
+    }
+    /* .product #underlay {
+        position: absolute;
+        display: block;
+        width: 100%;
+        opacity: 0.4;
+        z-index: 1;
+    } */
+    .product .info,
+    .product .icons,
+    .product .details {
+        position: relative;
+        z-index: 2;
+    }
+    .product .name {
+        display: flex;
+        align-items: center;
+        text-align: right;
+    }
+    .product .name p {
+        font-size: 8mm;
+        margin-right: 2mm;
+        margin-bottom: 0;
+    }
+    .product .price {
+        background-color: #ff2121;
+        border-radius: 5px 0 0 5px;
+        color: #fff;
+        text-align: center;
+    }
+    .product .price p {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: .75rem 0 .75rem;
+    }
+    .product .icons i { 
+        margin-bottom: 2mm;
+        font-size: 8mm; 
+    }
+    .product .icons p,
+    .product table tr td { 
+        font-size: 4mm; 
+    }
+    .product table thead tr td {
+        padding-bottom: 2mm;
+    }
+    .product table tr td {
+        border-right: solid 1px #f2f2f2;
+    }
+    .product table tr td:last-child {
+        border: none;
+    }
+</style>
+<div class="catalog">
+    {% for category in categories %}
+        {% if products[category.getMProductCategory.getId] is defined  %}
+            {% set pps = products[category.getMProductCategory.getId] %}
+            {% for pp in pps %}
+
+            <!-- {% if loop.index == 1 %}
+            <div 
+                class="row pages category" 
+                style="background: url('{{ pp.getMProductdownload[0].getDownloadurl }}') -50% center no-repeat; background-size: contain;"
+            >
+                <div class="col-12 title">
+                    <h2>{{ category.getMProductCategory.getName }}</h2>
+                </div>
+                <div class="col-12 brand">
+                    <h2>{{ category.getSmMarca.getName }}</h2>
+                </div>
+            </div>
+            {% endif %} -->
+
+            <div id="{{ pp.getValue }}" class="row pages product">
+                <div class="col-12 title">
+                    <h1>{{ category.getMProductCategory.getName }}</h1>
+                </div>
+                {% set img = pp.getMProductdownload[0].getDownloadurl|replace({'http://pedido.sumagroups.com': patch}) %}
+                <img id="cover" src="{{ img }}" alt="{{ pp.getName }}">
+                <!-- <img id="underlay" src="{{ pp.getMProductdownload[0].getDownloadurl }}"> -->
+                <div class="col-12 info">
+                    <div class="row justify-content-end">
+                        <div class="col-6 name">
+                            <p>{{ pp.getName }}</p>
+                        </div>
+                        <div class="col-4 price">
+                            <p>$100</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 icons">
+                    <div class="row">
+                        <div class="col-3 text-center">
+                            <i class="fa fa-user"></i>
+                            <p>ICON DESC.</p>
+                        </div>
+                        <div class="col-3 text-center">
+                            <i class="fa fa-user"></i>
+                            <p>ICON DESC.</p>
+                        </div>
+                        <div class="col-3 text-center">
+                            <i class="fa fa-user"></i>
+                            <p>ICON DESC.</p>
+                        </div>
+                        <div class="col-3 text-center">
+                            <i class="fa fa-user"></i>
+                            <p>ICON DESC.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 details">
+                    <table style="width: 100%; text-align: center;">
+                        <thead>
+                            <tr>
+                                <td>CODIGO</td>
+                                <td>COLOR</td>
+                                <td>CAPACIDAD</td>
+                                <td>VOLTAJE</td>
+                                <td>PESO</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ pp.getValue }}</td>
+                                <td>1231</td>
+                                <td>451</td>
+                                <td>1451</td>
+                                <td>145</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

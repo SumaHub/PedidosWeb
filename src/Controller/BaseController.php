@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Util;
-use Jaxon\AjaxBundle\Jaxon;
+use App\Repository\Main\AdRoleRepository;
+use App\Repository\Main\AdWindowAccessRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -15,9 +16,55 @@ class BaseController extends AbstractController
 {
     protected $loader;
 
+    protected $pdf;
+
     protected $session;
 
     protected $twig;
+
+    # TODO: Cambiar valores por el del usuario para Web Services
+    protected $ws = [
+        'client'=>1000001,
+        'role' => 1000002,
+        'user' => 'DMARQUEZ',
+        'pass' => 'T0tt014',
+        'stage'=> '9'
+    ];
+
+    protected $status = [
+        'VO' => [
+            'flag' => 'danger',
+            'name' => 'anulado'
+        ],
+        'IN' => [
+            'flag' => 'danger',
+            'name' => 'invalido'
+        ],
+        'CL' => [
+            'flag' => 'dark',
+            'name' => 'cerrado'
+        ],
+        'CO' => [
+            'flag' => 'success',
+            'name' => 'completo'
+        ],
+        'NA' => [
+            'flag' => 'danger',
+            'name' => 'no aprobado'
+        ],
+        'AP' => [
+            'flag' => 'warning',
+            'name' => 'aprobado'
+        ],
+        'IP' => [
+            'flag' => 'warning',
+            'name' => 'en progreso'
+        ],
+        'DR' => [
+            'flag' => 'info',
+            'name' => 'borrador'
+        ]
+    ];
 
     public function __construct()
     {
@@ -49,7 +96,7 @@ class BaseController extends AbstractController
      * 
      * @return \Symfony\Component\HttpFoundation\RedirectResponse Vista
      */
-    public function index(Jaxon $jaxon): RedirectResponse
+    public function index(): RedirectResponse
     { 
         return !$this->VerifySession() ? $this->logout() :  $this->login(); 
     }
@@ -67,8 +114,30 @@ class BaseController extends AbstractController
      * @param string $string
      * @return boolean
      */
-    public function VerifySession(){
-        return !is_null($this->session->get('user', null));
+    public function VerifySession() { return !is_null($this->session->get('user', null)); }
+
+    /** 
+     * Verifica los accesos del rol a la ventana
+     * @param string $string
+     * @return boolean
+     * 
+     */
+    public function VerifyWindow(ManagerRegistry $manager, Int $windowID = 0, Int $roleID = 0)
+    {
+        $RWindowAccess = new AdWindowAccessRepository($manager);
+        $window = $RWindowAccess->findBy(['ad_window_id'  => $windowID, 'ad_role_id'    => $roleID], null, 1);
+        if ( count($window) > 0 )
+            return $window[0]->getIsactive();
+
+        $RRole = new AdRoleRepository($manager);
+        $role = $RRole->find($roleID);
+        $roleIncludes = $role->getAdRoleIncludeds();
+        foreach ($roleIncludes as $role) {
+            if ( $this->VerifyWindow($manager, $windowID, $role->getIncludedRoleId()) )
+                return true;
+        }
+       
+        return false;
     }
 }
 ?>

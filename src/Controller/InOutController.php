@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Repository\CBpartnerRepository;
-use App\Repository\MInoutRepository;
+use App\Repository\Main\CBpartnerRepository;
+use App\Repository\Main\MInoutRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,7 +68,7 @@ Class InOutController extends BaseController
 
     /**
      * Ruta para ver una entrega
-     * @Route("/entrega/{documentno}/{id}", name="shipment_view")
+     * @Route("/entrega/{id}", name="shipment_view")
      * 
      * @param \Jaxon\AjaxBundle\Jaxon $jaxon 
      * @param \Doctrine\Persistence\ManagerRegistry $manager
@@ -77,7 +77,7 @@ Class InOutController extends BaseController
      * 
      * @return \Symfony\Component\HttpFoundation\Response Vista
      */
-    public function view(Jaxon $jaxon, ManagerRegistry $manager, String $documentno, String $id): Response
+    public function view(Jaxon $jaxon, ManagerRegistry $manager, String $id): Response
     {
         if( !$this->VerifySession() ) 
             return $this->logout();
@@ -88,16 +88,17 @@ Class InOutController extends BaseController
         $organization = $this->session->get('organization', null);
 
         $RInOut = new MInoutRepository($manager);
+        $InOut = $RInOut->find( base64_decode($id) );
         $response->setContent(
-            $this->twig->render('modules/inout/view.html', [
-                'title'         => 'Pedidos Web | Entrega | ' . $documentno,
+            $this->twig->render('modules/inout/view.html.twig', [
+                'title'         => 'Pedidos Web | Entrega | ' . $InOut->getDocumentno(),
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition sidebar-mini layout-fixed',
                 'modulo'        => 'Entregas',
-                'breadcrumb'    => $documentno,
+                'breadcrumb'    => $InOut->getDocumentno(),
                 'user'          => $user,
                 'organization'  => $organization,
-                'shipmet'       => $RInOut->find( base64_decode($id) ),
+                'shipment'      => $InOut,
                 'jaxonCss'      => $jaxon->css(),
                 'jaxonJs'       => $jaxon->js(),
                 'jaxonScript'   => $jaxon->script()

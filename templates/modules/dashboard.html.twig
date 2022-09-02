@@ -1,0 +1,318 @@
+{% extends "base.html.twig" %}
+
+{% block wrapper %}
+    <div class="wrapper">
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="/assets/img/AdminLTELogo.png" alt="{{ version }}" height="60" width="60">
+        </div>
+        
+        {{ include('section/navbar.html.twig') }}
+
+        {{ include('section/sidebar.html.twig') }}
+
+        {% block content_wrapper %}
+            <div class="content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1 class="m-0">{{ modulo }}</h1>
+                            </div>
+                            <div class="col-sm-6 text-right">
+                                {% block content_action %}
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                                    {% if breadcrumb %}
+                                        <li class="breadcrumb-item"><a href="/{{ modulo|lower }}">{{ modulo }}</a></li>
+                                        <li class="breadcrumb-item active">{{ breadcrumb }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item active">{{ modulo }}</li>
+                                    {% endif %}
+                                </ol>
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% block content %}
+                <!-- Main content -->
+                <div class="content">
+                    <div id="contenedor" class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3 id="qtyOrders">{{ stats.orderQty }}</h3>
+                                        <p>Pedidos Registrados</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/pedidos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-danger">
+                                    <div class="inner">
+                                        <h3 id="qtyOrdersToApprove">{{ stats.orderToApproveQty }}</h3>
+                                        <p>Pedidos por Aprobar</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/pedidos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3 id="qtyClients">{{ stats.bpartnerQty }}</h3>
+                                        <p>Clientes</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/clientes" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-12">
+                                <div class="small-box bg-purple">
+                                    <div class="inner">
+                                        <h3 id="qtyProduct">{{ stats.productQty }}</h3>
+                                        <p>Productos Registrados</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/productos" class="small-box-footer">M&aacute;s Informaci&oacute;n <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-7 connectedSortable">
+                                <!-- Draft Orders -->
+                                {% if stats.requisitionsInDraft|length > 0 %}
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-clipboard mr-1"></i>
+                                            Plantillas sin Procesar
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body table-responsive p-0">
+                                        <div class="table table-striped table-valign-middle">
+                                            <table class="table m-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nro.</th>
+                                                        <th>Cliente</th>
+                                                        <th>Estado</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for requisition in stats.requisitionsInDraft %}
+                                                    {% set status = requisition.getDocstatus|upper %}
+                                                    <tr>
+                                                        <td><a href="/plantilla/{{ requisition.getId|base64 }}">{{ requisition.getDocumentno }}</a></td>
+                                                        <td>{{ requisition.getCBpartner.getName }}</td>
+                                                        {% if status == 'DR' %}
+                                                            {% set text, flag = 'Borrador', 'info' %}
+                                                        {% else %}
+                                                            {% set text, flag = 'Desconocido', 'warning' %}
+                                                        {% endif %}
+                                                        <td><span class="badge badge-{{ flag }}">{{ text }}</span></td>
+                                                        <td><div class="sparkbar" data-color="#00a65a" data-height="20">{{ requisition.getDatedoc|date('Y-m-d H:i') }}</div></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer clearfix">
+                                        <a class="btn btn-success float-right" href="/plantilla"><i class="fas fa-plus"></i> Nueva Plantilla</a>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Last Orders -->
+                                {% if stats.requisitions|length > 0 %}
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-clipboard mr-1"></i>
+                                            &Uacute;ltimas Plantillas
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body table-responsive p-0">
+                                        <div class="table table-striped table-valign-middle">
+                                            <table class="table m-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nro.</th>
+                                                        <th>Cliente</th>
+                                                        <th>Estado</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for requisition in stats.requisitions %}
+                                                    {% set status = requisition.getDocstatus|upper %}
+                                                    <tr>
+                                                        <td><a href="/plantilla/{{ requisition.getId|base64 }}">{{ requisition.getDocumentno }}</a></td>
+                                                        <td>{{ requisition.getCBpartner.getName }}</td>
+                                                        {% if status == 'IP' %}
+                                                            {% set text, flag = 'En Progreso', 'info' %}
+                                                        {% elseif status == 'AP' %}
+                                                            {% set text, flag = 'Aprovado', 'success' %}
+                                                        {% elseif status == 'CO' %}
+                                                            {% set text, flag = 'Completo', 'success' %}
+                                                        {% elseif status == 'CL' %}
+                                                            {% set text, flag = 'Cerrado', 'warning' %}
+                                                        {% else %}
+                                                            {% set text, flag = 'Desconocido', 'warning' %}
+                                                        {% endif %}
+                                                        <td><span class="badge badge-{{ flag }}">{{ text }}</span></td>
+                                                        <td><div class="sparkbar" data-color="#00a65a" data-height="20">{{ requisition.getDatedoc|date('Y-m-d H:i') }}</div></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer clearfix">
+                                        <a class="btn btn-primary float-right" href="/plantillas"><i class="fas fa-clipboard-list"></i> Ver Mas</a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-5 connectedSortable">
+                                <!-- Last Products -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-pricetags mr-1"></i>
+                                            &Uacute;ltimos Productos Agregados
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                                        {% for product in stats.products %}
+                                            <li class="item">
+                                                <div class="product-img">
+                                                    {% if product.getMProductdownload|length > 0 %}
+                                                        {% for image in product.getMProductdownload %}
+                                                            <img src="{{ image.getDownloadurl }}" alt="{{ product.getSku }}" class="img-size-50">
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <img src="/assets/img/default-150x150.png" alt="{{ product.getSku }}" class="img-size-50">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="product-info">
+                                                    <a href="javascript:void(0)" class="product-title text-capitalize">
+                                                        {{ product.getMProductCategory.getName }}
+                                                        <span class="badge badge-{% if product.cantidad > 10 %}info{% else %}warning{% endif %} float-right">${{ product.pricelist }}</span>
+                                                    </a>
+                                                    <span class="product-description">{{ product.getName }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="/productos" class="uppercase">Ver m&aacute;s Productos</a>
+                                    </div>
+                                </div>
+
+                                <!-- Featured Products -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="ion ion-pricetags mr-1"></i>
+                                            Productos Destacados
+                                        </h3>
+                        
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                                            {% for product in stats.productsFeatured %}
+                                            <li class="item">
+                                                <div class="product-img">
+                                                    {% if product.getMProductdownload|length > 0 %}
+                                                        {% for image in product.getMProductdownload %}
+                                                            <img src="{{ image.getDownloadurl }}" alt="{{ product.getSku }}" class="img-size-50">
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <img src="/assets/img/default-150x150.png" alt="{{ product.getSku }}" class="img-size-50">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="product-info">
+                                                    <a href="javascript:void(0)" class="product-title text-capitalize">
+                                                        {{ product.getSku }}
+                                                    </a>
+                                                    <a class="product-description" href="/producto/{{ product.getValue }}">{{ product.getName }}</a>
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <a href="/productos" class="uppercase">Ver m&aacute;s Productos</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            </div>
+        {% endblock %}
+
+        {{ include('section/sidecontrol.html.twig') }}
+        
+        {{ include('section/footer.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+{% endblock %}

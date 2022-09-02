@@ -1,0 +1,25 @@
+{
+    "ModelRunProcessRequest": {
+        "ModelRunProcess": {
+            "serviceType": "ProcessOrder",
+            "ParamValues": {
+                "field": [
+                    {
+                        "@column": "AD_Record_ID",
+                        "val": "{{ order.getId }}"
+                    }
+                ]
+            }
+        },
+        "ADLoginRequest": {
+            "user": "{{ ws.user }}",
+            "pass": "{{ ws.pass }}",
+            "lang": "en_US",
+            "ClientID": "{{ ws.client }}",
+            "RoleID": "{{ ws.role }}",
+            "OrgID": "{{ order.getAdOrgId }}",
+            "WarehouseID": "{{ order.getMWarehouseId }}",
+            "stage": "{{ ws.stage }}"
+        }
+    }
+}

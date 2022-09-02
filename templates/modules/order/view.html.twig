@@ -1,0 +1,337 @@
+{% extends "modules/dashboard.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-searchbuilder-bs4/css/searchBuilder.bootstrap4.min.css">
+{% endblock %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <form id="order">
+                        <div class="card card-outline card-info">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="organization">Organizaci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-building"></i>
+                                                    </span>
+                                                </div>
+                                                <select id="organization" name="organization" class="form-control" readonly>
+                                                         <option value="{{ organization.getId }}">{{ organization.getName }}</option>
+                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="bpartner">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="bpartner" name="bpartner" type="text" class="form-control" value="{{ order.getCBpartner.getName }}" onkeyup="if(event.keyCode == 13){ $('#setBpartner').click(); }" placeholder="Nombre o RIF" readonly>
+                                                <input id="bpartner_id" name="bpartner_id" type="hidden" value="{{ order.getCBpartnerId }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documenttype">Tipo de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-file-invoice"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="documenttype" id="documenttype" class="form-control" readonly="true">
+                                                    <option value="{{ order.getCDoctypeId }}" checked="true">{{ order.getCDoctype.getName }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documentno">Nro de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="documentno" type="text" value="{{ order.getDocumentno }}" class="form-control" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="document">Vendedor</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="salesrep" name="salesrep"type="text" class="form-control" value="{{ salesrep.getName }}" onkeyup="if(event.keyCode == 13){ $('#setSalesrep').click(); }" placeholder="Nombre" readonly>
+                                                <input id="salesrep_id" name="salesrep_id" type="hidden" value="{{ salesrep.getId }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="document">Almac&eacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <select id="warehouse" name="warehouse" class="form-control" readonly>
+                                                    <option value="{{ warehouse.getId }}">{{ warehouse.getName }}</option>
+                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="description">Descripci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <textarea name="description" id="description" class="form-control" rows="2" readonly>{{ order.getDescription }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="address">Direcci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-map"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="address" id="address" class="form-control" value="{{ order.getCBpartnerLocation.getCLocation.getAddress1 }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="phone">Tel&eacute;fono</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-phone"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="phone" type="text" class="form-control" value="{{ order.getCBpartnerLocation.getPhone }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="currency">Moneda</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-dollar-sign"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="currency" id="currency" class="form-control" readonly>
+                                                    <option value="{{ order.getCCurrencyId }}">{{ order.getCCurrency.getIsoCode }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="pricelist">Lista de Precio</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="pricelist" id="pricelist" class="form-control" required>
+                                                    <option value="{{ order.getMPricelist.getId }}" selected>{{ order.getMPricelist.getName }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="paymentrule">Regla de Pago</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-hand-holding-usd"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="paymentrule" id="paymentrule" class="form-control" readonly>
+                                                    <option value="{{ order.getPaymentrule }}" checked="true">
+                                                        {% if  order.getPaymentrule == 'P' %}
+                                                            Con Termino de Pago
+                                                        {% elseif order.getPaymentrule == 'M' %}
+                                                            Multiples Medios de Pago
+                                                        {% endif %}
+                                                    </option>    
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="termino">T&eacute;rmino de Pago</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-hand-holding-usd"></i>
+                                                    </span>
+                                                </div>
+                                                <select name="paymentterm" id="paymentterm" class="form-control" readonly>
+                                                    <option value="{{ order.getCPaymentterm.getId }}">{{ order.getCPaymentterm.getName }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">C&oacute;digo</th>
+                                        <th class="text-center">Precio</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos"> 
+                                    {% for orderline in orderlines %}
+                                    <tr class="text-center orderline" id="{{ orderline.getId|base64 }}">
+                                        <td class="text-center">{{ orderline.getLine }}</td>
+                                        <td class="text-left">  {{ orderline.getMProduct.getName }}</td>
+                                        <td class="text-center">{{ orderline.getMProduct.getValue }}</td>
+                                        <td class="text-right prc">{{ number_format(orderline.getPricelist, 2) }}</td>
+                                        <td class="text-right qty">{{ number_format(orderline.getQtyentered, 2) }}</td>
+                                        <td class="text-right amt">{{ number_format(orderline.getLinenetamt, 2) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="totallines">Sub Total</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                </span>
+                                            </div>
+                                            <input id="totallines" type="text" value="{{ number_format(order.getTotallines, 2) }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="taxamt">Impuestos</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-balance-scale"></i>
+                                                </span>
+                                            </div>
+                                            <input id="taxamt" type="text" value="{{ number_format(order.getGrandtotal - order.getTotallines, 2) }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="grandtotal">Total</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-receipt"></i>
+                                                </span>
+                                            </div>
+                                            <input id="grandtotal" type="text" value="{{ number_format(order.getGrandtotal, 2) }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="docstatus">Estatus del Documento</label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-receipt"></i>
+                                                </span>
+                                            </div>
+                                            {% if order.getDocstatus == 'DR' %}
+                                                {% set estatus = 'Borrador' %}
+                                            {% elseif order.getDocstatus == 'IP' %}
+                                                {% set estatus = 'En Progreso' %}
+                                            {% elseif order.getDocstatus == 'AP' %}
+                                                {% set estatus = 'Aprovado' %}
+                                            {% elseif order.getDocstatus == 'CO' %}
+                                                {% set estatus = 'Completo' %}
+                                            {% else %}
+                                                {% set estatus = 'Desconocido' %}
+                                            {% endif %}
+                                            <input id="docstatus" type="text" value="{{ estatus }}" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script src="/node_modules/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="/node_modules/jszip/dist/jszip.min.js"></script>
+    <script src="/node_modules/pdfmake/build/pdfmake.min.js"></script>
+    <script src="/node_modules/pdfmake/build/vfs_fonts.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder/js/dataTables.searchBuilder.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder-bs4/js/searchBuilder.bootstrap4.min.js"></script>
+{% endblock %}
