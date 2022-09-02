@@ -38,10 +38,10 @@ class Util
     public static function WriteLog(String $text)
     {
         $fileName   = 'error_' . date('YmdHis') . rand(1, intval(date('Hisu'))) . '.txt';
-        $fileDir = dirname(__DIR__) . '/public/temp/' . $fileName;
+        $fileDir = dirname(__DIR__) . '/public/tmp/' . $fileName;
         $tempFile   = fopen($fileDir, 'w');
         fwrite($tempFile, $text);
         fclose($tempFile);
-        return '/temp/' . $fileName;
+        return '/tmp/' . $fileName;
     }
 }

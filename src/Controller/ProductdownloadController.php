@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Constant;
-use App\Entity\MProductdownload;
-use App\Repository\AdSequenceRepository;
-use App\Repository\MProductdownloadRepository;
-use App\Repository\MProductRepository;
+use App\Entity\Main\MProductdownload;
+use App\Repository\Main\AdSequenceRepository;
+use App\Repository\Main\MProductdownloadRepository;
+use App\Repository\Main\MProductRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;

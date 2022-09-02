@@ -20,8 +20,9 @@ parameters:
           verbose:                     false
         error:
           handle:                      false
-        js:
-          lib:
-          app:
+      js:
+        lib:                         
+          uri:                         "/vendor/jaxon-php/jaxon-js/dist"
+        app:
           export:                      false
           minify:                      false

@@ -1,5 +1,10 @@
 {
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "require": {
-        "components/jquery": "^3.5"
+        "components/jquery": "^3.5",
+        "jaxon-php/jaxon-js": "3.2"
     }
 }

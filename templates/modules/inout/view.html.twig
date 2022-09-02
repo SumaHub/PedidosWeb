@@ -1,0 +1,291 @@
+{% extends "modules/dashboard.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="/node_modules/datatables.net-searchbuilder-bs4/css/searchBuilder.bootstrap4.min.css">
+{% endblock %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <form id="shipment">
+                        <div class="card card-outline card-info">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="organization">Organizaci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-building"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" id="organization" name="organization" class="form-control" value="{{ shipment.getAdOrg.getName }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="bpartner">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" id="bpartner" name="bpartner" class="form-control" value="{{ shipment.getCBpartner.getName }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documenttype">Tipo de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-file-invoice"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" id="documenttype" name="documenttype" class="form-control" value="{{ shipment.getCDoctype.getName }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="documentno">Nro de Documento</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="documentno" type="text" value="{{ shipment.getDocumentno }}" class="form-control" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="description">Descripci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <textarea name="description" id="description" class="form-control" rows="2" readonly>{{ shipment.getDescription }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="address">Direcci&oacute;n</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-map"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="address" id="address" class="form-control" value="{{ shipment.getCBpartnerLocation.getCLocation.getAddress1 }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="phone">Tel&eacute;fono</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-phone"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="phone" type="text" class="form-control" value="{{ shipment.getCBpartnerLocation.getPhone }}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">C&oacute;digo</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Cantidad Confirmada</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos"> 
+                                    {% for inoutline in shipment.getMInoutlines %}
+                                    <tr class="text-center">
+                                        <td>{{ inoutline.getLine }}</td>
+                                        <td class="text-left">{{ inoutline.getMProduct.getName }}</td>
+                                        <td>{{ inoutline.getMProduct.getValue }}</td>
+                                        <td class="text-right">{{ number_format(inoutline.getQtyentered, 2) }}</td>
+                                        <td class="text-right">{{ number_format(inoutline.getConfirmedqty, 2) }}</td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    {% if shipment.getDocstatus == 'DR' %}
+                                        <tr id="cleanline">
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">
+                                                <input id="product_1" type="text" placeholder="XXXX000001">
+                                            </td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td style="vertical-align: middle; text-align: center;">+</td>
+                                            <td><button class="btn btn-info float-right" data-toggle="modal" data-target="#productModal"><i class="fas fa-plus"></i> Agregar Producto</button></td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="mx-1 btn btn-lg btn-success"><i class="far fa-envelope"></i> Enviar Entrega</button>
+                                <button type="button" class="mx-1 btn btn-lg btn-info"><i class="fas fa-print"></i> Imprimir Entrega</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal fade" id="clientModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Cliente</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#buscarCliente').click();">
+                                        <div class="form-group">
+                                            <label for="codigo_cliente">Cliente</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="codigo_cliente" type="text" class="form-control" placeholder="Nombre o RIF">
+                                                <div class="input-group-prepend">
+                                                    <button id="buscarCliente" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="clientes" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" style="display: none;" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Buscar Producto</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <form onsubmit="event.preventDefault(); $('#getProducts').click();">
+                                        <div class="form-group">
+                                            <label for="product_value">Producto</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-boxes"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="product_value" type="text" class="form-control" placeholder="Nombre, C&oacute;digo o SKU">
+                                                <div class="input-group-prepend">
+                                                    <button id="getProducts" class="btn btn-info btn-flat" type="button">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="products" class="card-body">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script src="/node_modules/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="/node_modules/jszip/dist/jszip.min.js"></script>
+    <script src="/node_modules/pdfmake/build/pdfmake.min.js"></script>
+    <script src="/node_modules/pdfmake/build/vfs_fonts.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="/node_modules/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/node_modules/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder/js/dataTables.searchBuilder.min.js"></script>
+    <script src="/node_modules/datatables.net-searchbuilder-bs4/js/searchBuilder.bootstrap4.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+    <script>App.Jaxon.Invoice.init();</script>
+{% endblock %}

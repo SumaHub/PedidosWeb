@@ -400,7 +400,7 @@ mark,
   padding: 0.25rem;
   background-color: #fff;
   border: 1px solid #dee2e6;
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.075);
   max-width: 100%;
   height: auto; }
@@ -3485,6 +3485,11 @@ input[type="button"].btn-block {
   background-clip: border-box;
   border: 0 solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem; }
+  .card.rounded {
+    border-radius: 1rem 1rem 0 0 !important;
+    overflow: hidden; }
+  .card:hover > .card-header > .floating {
+    transform: translate3d(-20px, -20px, 0px); }
   .card > hr {
     margin-right: 0;
     margin-left: 0; }
@@ -3506,7 +3511,8 @@ input[type="button"].btn-block {
 .card-body {
   flex: 1 1 auto;
   min-height: 1px;
-  padding: 1.25rem; }
+  padding: 1.25rem;
+  z-index: 2; }
 
 .card-title {
   margin-bottom: 0.75rem; }
@@ -3528,6 +3534,19 @@ input[type="button"].btn-block {
   margin-bottom: 0;
   background-color: rgba(0, 0, 0, 0.03);
   border-bottom: 0 solid rgba(0, 0, 0, 0.125); }
+  .card-header > .floating {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 0px;
+    bottom: 0px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    transform: translate3d(-20px, 20px, 0px);
+    transition: all .8s ease-in-out;
+    z-index: 3; }
   .card-header:first-child {
     border-radius: calc(0.25rem - 0) calc(0.25rem - 0) 0 0; }
 
@@ -21092,7 +21111,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .product-image-thumb {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.075);
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   background-color: #fff;
   border: 1px solid #dee2e6;
   display: flex;

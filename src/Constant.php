@@ -74,5 +74,5 @@ class Constant
      * Ruta Home del usuario web
      * @return string Ruta
      */
-    public const HOME_PATH = 'totto/Proyectos/';
+    public const HOME_PATH = 'totto/Proyectos';
 }

@@ -1,0 +1,161 @@
+{% extends "modules/dashboard.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content_action %}
+<button id="searchProduct" type="button" class="btn btn-outline-info">
+    <i class="fa fa-search"></i> Filtrar Productos
+</button>
+<a href="/dw/catalogo" class="btn btn-primary">
+    <i class="fa fa-download"></i> Descargar Cat&aacute;logo
+</a>
+{% endblock %}
+
+{% block style %}
+    <style>
+        #products .card-title{
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+        }
+        .bullets { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .bullets .bullet {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #007bff;
+            cursor: pointer;
+        }
+        .bullets .bullet.bullet-actual {
+            background-color: #007bff;
+        }
+        .bullets .bullet a {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #007bff;
+        }
+        .bullets .bullet.bullet-actual a {
+            color: #fff;
+            font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}   
+    <div class="content">
+        <div id="contenedor" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div id="products">
+                        <div class="row">
+                            {% for product in products %}
+                            <div class="col-12 col-lg-4">
+                                <div class="card rounded">
+                                    <div class="card-header p-0">
+                                        {% if product.getMProductdownload|length > 0 %}
+                                        <img class="card-img-top" src="{{ product.getMProductdownload[0].getDownloadurl }}" onerror="this.src='https://ui-avatars.com/api/?size=400&background=63686c&color=343a40&name={{ product.getMProductCategory.getName }}'" alt="{{ product.getValue }}">
+                                        {% else %}
+                                        <img class="card-img-top" src="https://ui-avatars.com/api/?size=400&background=63686c&color=343a40&name={{ product.getMProductCategory.getName }}" alt="{{ product.getValue }}">
+                                        {% endif %}
+                                        <a href="/producto/{{ product.getValue }}" class="btn btn-primary floating float-right">
+                                            <i class="fa fa-search"></i>
+                                        </a>
+                                    </div>
+                                    <div class="card-body" style="background-color: #fff;">
+                                        <h5 class="card-title">{{ product.getName }}</h5>
+                                        <p class="card-text text-muted">{{ product.getValue }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bullets container-fluid">
+            {% set pages = productsQty / limit %}
+            {% set pages = pages|round %}
+
+            {% if actual > 0 %}
+                {% if (pages - actual) > 3 %}
+                    {% set end = actual + 2 %}
+                {% else %}
+                    {% set end = pages %}
+                {% endif %}
+
+                {% if actual > 3 %}
+                    {% set start = actual - 2 %}
+                {% else %}
+                    {% set start = 1 %}
+                {% endif %}
+            {% endif %}
+
+            <div class="bullet bullet-prev">
+                <a href="/galeria?a={{ actual - 1 }}">
+                    <i class="fa fa-arrow-left"></i>
+                </a>
+            </div>
+
+            {% if actual > 3 %}
+            <div class="bullet bullet-start">
+                <a href="/galeria?a=1">{{ 1 }}</a>
+            </div>
+            {% endif %}
+
+            {% if actual > 4 %}
+            <div class="bullet">
+                <a href="/galeria?a={{ start - 1 }}">...</a>
+            </div>
+            {% endif %}
+
+            {% for i in start..end %}
+            <div class="bullet {% if i == actual %} bullet-actual {% endif %}">
+                <a href="/galeria?a={{ i }}">{{ i }}</a>
+            </div>
+            {% endfor %}
+
+            {% if (pages - actual) > 3 %}
+            <div class="bullet">
+                <a href="/galeria?a={{ end + 1 }}">...</a>
+            </div>
+            {% endif %}
+
+            {% if (pages - actual) > 3 %}
+            <div class="bullet bullet-end">
+                <a href="/galeria?a={{ pages }}">{{ pages }}</a>
+            </div>
+            {% endif %}
+
+            <div class="bullet bullet-next">
+                <a href="/galeria?a={{ actual + 1 }}">
+                    <i class="fa fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+{% endblock %}
+
+{% block scripts %}    
+    <script>
+        var _value = $("#value")[0];
+        $("#search").on("click", function() { 
+            
+        });
+    </script>
+{% endblock %}

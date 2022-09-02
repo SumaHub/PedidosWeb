@@ -1,0 +1,25 @@
+{
+    "ModelRunProcessRequest": {
+        "ModelRunProcess": {
+            "serviceType": "ProcessSalesTemplate",
+            "ParamValues": {
+                "field": [
+                    {
+                        "@column": "AD_Record_ID",
+                        "val": "{{ requisition.getId }}"
+                    }
+                ]
+            }
+        },
+        "ADLoginRequest": {
+            "user": "{{ ws.user }}",
+            "pass": "{{ ws.pass }}",
+            "lang": "en_US",
+            "ClientID": "{{ ws.client }}",
+            "RoleID": "{{ ws.role }}",
+            "OrgID": "{{ requisition.getAdOrgId }}",
+            "WarehouseID": "{{ requisition.getMWarehouseId }}",
+            "stage": "{{ ws.stage }}"
+        }
+    }
+}

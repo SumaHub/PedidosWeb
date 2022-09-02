@@ -2,9 +2,9 @@
 
 namespace App\Jaxon;
 
-use App\Entity\AdOrg;
-use App\Entity\MWarehouse;
-use App\Model\Organization as ModelOrg;
+use App\Entity\Main\AdOrg;
+use App\Entity\Main\AdRole;
+use App\Entity\Main\MWarehouse;
 use Jaxon\Response\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -38,19 +38,6 @@ class Organization extends Base implements Template
         $jxnr->assign('warehouse', 'innerHTML', $html);
         return $jxnr;
     }
-
-    public function getPricelist(Int $organization)
-    {
-        $jxnr       = new Response;
-        $model      = new ModelOrg;
-        $priceList  = $model->get_pricelist($organization);
-        $html       = '<option value="0">-- Seleccione una Opci&oacute;n --</option>';
-        foreach ($priceList as $list) {
-            $html .= '<option value="'.$list['m_pricelist_id'].'">'.$list['nombre'].'</option>';
-        }
-        $jxnr->assign('precio', 'innerHTML', $html);
-        return $jxnr;
-    }
     
     public static function init()
     {
@@ -69,23 +56,11 @@ class Organization extends Base implements Template
         if( empty($options['organization']) || $options['organization'] == 0 )
             return $jxnr->alert('Por favor, seleccione una organizacion!');
 
-        $session->set('role', $this->manager->getRepository(AdOrg::class)->find($options['role']));
+        $session->set('role', $this->manager->getRepository(AdRole::class)->find($options['role']));
         $session->set('organization', $this->manager->getRepository(AdOrg::class)->find($options['organization']));
         $session->set('warehouse', $this->manager->getRepository(MWarehouse::class)->find($options['warehouse']));
 
         return $jxnr->redirect("/dashboard");
-    }
-
-    public static function setPricelist(Int $organization = null)
-    {
-        $model = new ModelOrg;
-
-        $priceList      = $model->get_pricelist($organization ?? $_SESSION['organization']['ad_org_id']);
-        $html           = '';
-        foreach ($priceList as $list) {
-            $html .= '<option value="'.$list['m_pricelist_id'].'">'.$list['nombre'].'</option>';
-        }
-        return $html;
     }
 }
 

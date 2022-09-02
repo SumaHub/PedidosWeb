@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Repository\AdUserRepository;
+use App\Repository\Main\AdUserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Jaxon\AjaxBundle\Jaxon;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +27,7 @@ class UserController extends BaseController
         $session->set('logged', false);
         
         $response->setContent(
-            $this->twig->render('modules/user/signin.html', [
+            $this->twig->render('modules/user/signin.html.twig', [
                 'title'         => 'Pedidos Web | Ingreso',
                 'version'       => 'Versi&oacute;n 2.0',
                 'bodyClass'     => 'hold-transition login-page',
@@ -60,7 +60,7 @@ class UserController extends BaseController
         $RUser = new AdUserRepository($manager);
 
         $response->setContent(
-            $this->twig->render('modules/user/organization.html', [
+            $this->twig->render('modules/user/organization.html.twig', [
                 'title'         => 'Pedidos Web | Organizaci&oacute;n',
                 'version'       => 'Versi&oacute;n 2.0.0',
                 'bodyClass'     => 'hold-transition login-page',
